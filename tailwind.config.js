@@ -36,6 +36,11 @@ export default {
           'from': { transform: 'scaleX(0)' },
           'to': { transform: 'scaleX(1)' },
         },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '15%, 45%, 75%': { transform: 'translateX(-6px)' },
+          '30%, 60%, 90%': { transform: 'translateX(6px)' },
+        },
         fadeUp: {
           'from': { opacity: '0', transform: 'translateY(30px)' },
           'to': { opacity: '1', transform: 'translateY(0)' },
@@ -47,6 +52,7 @@ export default {
         'float-delay2': 'float 4s ease-in-out -3s infinite',
         pulse2: 'pulse2 2s ease-in-out infinite',
         grow: 'grow 1.2s cubic-bezier(0.22,1,0.36,1) forwards',
+        shake: 'shake 0.5s ease-in-out',
       },
     },
   },

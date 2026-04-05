@@ -16,7 +16,7 @@ export default function Hero() {
           </h1>
 
           <p className="text-text-muted text-[17px] leading-[1.7] mb-10 max-w-[440px]">
-            I'm <strong className="text-text font-semibold">Alex Morgan</strong>, a junior data analyst with a passion for uncovering hidden patterns and building clean, compelling dashboards that drive real decisions.
+            I'm <strong className="text-text font-semibold">Abhishek Kumar</strong>, a junior data analyst with a passion for uncovering hidden patterns and building clean, compelling dashboards that drive real decisions.
           </p>
 
           <div className="flex gap-4 items-center">
@@ -34,7 +34,7 @@ export default function Hero() {
             {[
               { num: '8+', label: 'Projects' },
               { num: '3', label: 'Certifications' },
-              { num: '1yr', label: 'Experience' },
+              { num: '0.5yr', label: 'Experience' },
             ].map(({ num, label }) => (
               <div key={label} className="bg-surface px-6 py-7 text-center">
                 <div className="font-serif text-[36px] text-accent leading-none mb-1.5">{num}</div>

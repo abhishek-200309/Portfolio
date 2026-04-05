@@ -1,8 +1,7 @@
 const certs = [
-  { icon: '🎓', name: 'Google Data Analytics Professional', org: 'Google · 2023' },
-  { icon: '📊', name: 'Tableau Desktop Specialist', org: 'Tableau · 2024' },
-  { icon: '🐍', name: 'Python for Data Science', org: 'IBM / Coursera · 2023' },
-  { icon: '☁️', name: 'BigQuery Fundamentals', org: 'Google Cloud · 2024' },
+  { icon: '🎓', name: 'Data Analytics With Gen AI', org: 'Brillica Services · 2026' },
+  { icon: '📊', name: 'Tableau Desktop ', org: 'Brillica Services · 2026' },
+  { icon: '🐍', name: 'Python for Data Analytics', org: 'Brillica Services · 2026' },
 ];
 
 export default function Certifications() {

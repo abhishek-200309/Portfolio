@@ -11,6 +11,7 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Lightbox from './components/Lightbox';
 import ManageModal from './components/ManageModal';
+import OwnerAuth, { isOwnerSession } from './components/OwnerAuth';
 
 import type { MediaStore } from './types';
 
@@ -39,6 +40,12 @@ function readFiles(files: FileList): Promise<Array<{ type: 'image' | 'video'; sr
 export default function App() {
   const [mediaStore, setMediaStore] = useState<MediaStore>(INITIAL_MEDIA);
   const [activeSection, setActiveSection] = useState('hero');
+
+  // Owner auth
+  const [isOwner, setIsOwner] = useState(() => isOwnerSession());
+  const [authOpen, setAuthOpen] = useState(false);
+  // Pending action after auth success (to open manage modal for a specific project)
+  const [pendingManage, setPendingManage] = useState<{ pid: number; name: string } | null>(null);
 
   // Lightbox state
   const [lbOpen, setLbOpen] = useState(false);
@@ -85,8 +92,7 @@ export default function App() {
   // Lightbox handlers
   const openLightbox = useCallback((pid: number, startIdx = 0) => {
     if ((mediaStore[pid] ?? []).length === 0) {
-      const name = document.querySelector(`[data-pid="${pid}"] .project-name-text`)?.textContent ?? '';
-      openManage(pid, name);
+      openManage(pid, '');
       return;
     }
     setLbPid(pid);
@@ -109,6 +115,27 @@ export default function App() {
     setManageOpen(true);
   };
   const closeManage = () => setManageOpen(false);
+
+  // Owner auth — called when a visitor clicks the locked 🔒 button
+  const handleRequestOwnerAuth = (pid: number, name: string) => {
+    setPendingManage({ pid, name });
+    setAuthOpen(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setIsOwner(true);
+    setAuthOpen(false);
+    // If triggered from a specific project card, open that manage modal immediately
+    if (pendingManage) {
+      openManage(pendingManage.pid, pendingManage.name);
+      setPendingManage(null);
+    }
+  };
+
+  const handleAuthClose = () => {
+    setAuthOpen(false);
+    setPendingManage(null);
+  };
 
   const handleAddFiles = async (pid: number, files: FileList) => {
     const newItems = await readFiles(files);
@@ -134,15 +161,17 @@ export default function App() {
 
   return (
     <>
-      <Navbar activeSection={activeSection} />
+      <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); sessionStorage.removeItem('am_portfolio_owner'); }} onOwnerLogin={() => setAuthOpen(true)} />
 
       <main>
         <Hero />
         <About />
         <Projects
           mediaStore={mediaStore}
+          isOwner={isOwner}
           onOpenLightbox={openLightbox}
           onOpenManage={openManage}
+          onRequestOwnerAuth={handleRequestOwnerAuth}
         />
         <Experience />
         <Certifications />
@@ -169,6 +198,12 @@ export default function App() {
         onAddFiles={handleAddFiles}
         onDeleteFile={handleDeleteFile}
         onClickThumb={handleClickThumb}
+      />
+
+      <OwnerAuth
+        isOpen={authOpen}
+        onSuccess={handleAuthSuccess}
+        onClose={handleAuthClose}
       />
     </>
   );

@@ -3,8 +3,10 @@ import type { MediaStore } from '../types';
 
 interface ProjectsProps {
   mediaStore: MediaStore;
+  isOwner: boolean;
   onOpenLightbox: (pid: number) => void;
   onOpenManage: (pid: number, name: string) => void;
+  onRequestOwnerAuth: (pid: number, name: string) => void;
 }
 
 const projects = [
@@ -83,7 +85,7 @@ function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: M
   );
 }
 
-export default function Projects({ mediaStore, onOpenLightbox, onOpenManage }: ProjectsProps) {
+export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenManage, onRequestOwnerAuth }: ProjectsProps) {
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   return (
@@ -95,10 +97,17 @@ export default function Projects({ mediaStore, onOpenLightbox, onOpenManage }: P
             Projects that show<br />what I can do
           </h2>
         </div>
-        <div className="font-mono text-[11px] text-text-dim text-right leading-[1.7] pb-1.5 hidden md:block">
-          Click <span className="text-accent">+ Add Media</span> on any card<br />
-          to upload screenshots or videos
-        </div>
+        {isOwner ? (
+          <div className="font-mono text-[11px] text-text-dim text-right leading-[1.7] pb-1.5 hidden md:block">
+            Click <span className="text-accent">+ Add Media</span> on any card<br />
+            to upload screenshots or videos
+          </div>
+        ) : (
+          <div className="font-mono text-[11px] text-text-dim text-right leading-[1.7] pb-1.5 hidden md:block">
+            Projects showcase <span className="text-accent">real analysis</span><br />
+            and interactive dashboards
+          </div>
+        )}
       </div>
 
       <div className="h-8" />
@@ -144,12 +153,22 @@ export default function Projects({ mediaStore, onOpenLightbox, onOpenManage }: P
                 ref={el => { inputRefs.current[p.id] = el; }}
                 className="hidden"
               />
-              <button
-                onClick={() => onOpenManage(p.id, p.name)}
-                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-accent bg-accent/8 border border-accent/20 rounded-md px-3 py-1.5 cursor-pointer transition-all duration-200 tracking-[0.04em] hover:bg-accent/14 hover:border-accent/40"
-              >
-                ＋ Add Media
-              </button>
+              {isOwner ? (
+                <button
+                  onClick={() => onOpenManage(p.id, p.name)}
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] text-accent bg-accent/[0.08] border border-accent/20 rounded-md px-3 py-1.5 cursor-pointer transition-all duration-200 tracking-[0.04em] hover:bg-accent/[0.14] hover:border-accent/40"
+                >
+                  ＋ Add Media
+                </button>
+              ) : (
+                <button
+                  onClick={() => onRequestOwnerAuth(p.id, p.name)}
+                  title="Owner-only feature"
+                  className="inline-flex items-center gap-1.5 font-mono text-[10px] text-text-dim border border-border/50 rounded-md px-2.5 py-1 cursor-pointer transition-all duration-200 tracking-[0.04em] hover:text-text-muted hover:border-border opacity-40 hover:opacity-80"
+                >
+                  🔒 Manage
+                </button>
+              )}
             </div>
           </div>
         ))}
