@@ -66,7 +66,7 @@ export default function ManageModal({
                 onClick={() => { onClose(); onClickThumb(pid, idx); }}
               >
                 {item.type === 'video'
-                  ? <video src={item.src} muted className="w-full h-full object-cover" />
+                  ? <video src={item.src} muted controlsList="nodownload noplaybackrate" disablePictureInPicture className="w-full h-full object-cover" />
                   : <img src={item.src} alt="" className="w-full h-full object-cover" />
                 }
                 <div

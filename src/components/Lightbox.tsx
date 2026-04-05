@@ -53,6 +53,8 @@ export default function Lightbox({ isOpen, pid, idx, mediaStore, onClose, onNav 
             src={item.src}
             controls
             autoPlay
+            controlsList="nodownload noplaybackrate"
+            disablePictureInPicture
             className="max-w-[85vw] max-h-[75vh] rounded-xl object-contain"
           />
         ) : (

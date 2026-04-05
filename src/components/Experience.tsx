@@ -1,32 +1,19 @@
 const timeline = [
   {
-    date: 'Jan 2024 – Present',
-    role: 'Junior Data Analyst (Intern)',
-    org: 'TechRetail Co. · Remote',
+    date: 'Current',
+    role: 'Quality Analyst',
+    org: 'EstateDekho · Dehradun, Uttarakhand',
     bullets: [
-      'Built and maintained 6 Tableau dashboards used by the marketing and ops teams weekly',
-      'Wrote complex SQL queries to support A/B test reporting across 3 product lines',
-      'Cleaned and transformed 2M+ row datasets using Python (Pandas) for monthly reporting',
-      'Presented findings to non-technical stakeholders in weekly review sessions',
+      'Contribute to maintaining data accuracy and quality assurance.',
+      'Assist in finding insights to support business objectives.',
     ],
   },
   {
-    date: 'Aug 2023 – Dec 2023',
-    role: 'Google Data Analytics Certificate',
-    org: 'Coursera / Google · Self-paced',
+    date: '2017 – 2021',
+    role: 'High School / Early Education',
+    org: 'Vivekananda School',
     bullets: [
-      'Completed 8-course professional certificate covering SQL, R, Tableau, and data cleaning',
-      'Capstone: Analyzed Cyclistic bike-share data to surface rider behavior patterns',
-    ],
-  },
-  {
-    date: '2020 – 2023',
-    role: 'BSc Statistics',
-    org: 'Delhi University · New Delhi, India',
-    bullets: [
-      'Graduated with First Class Honors (GPA 3.7/4.0)',
-      'Coursework: Probability, Regression Analysis, Time Series, Data Mining',
-      'Final project: Predictive modeling of crop yield using weather data',
+      'Completed foundational education.',
     ],
   },
 ];

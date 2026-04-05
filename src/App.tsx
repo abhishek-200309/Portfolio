@@ -15,7 +15,10 @@ import OwnerAuth, { isOwnerSession } from './components/OwnerAuth';
 
 import type { MediaStore } from './types';
 
-const INITIAL_MEDIA: MediaStore = { 0: [], 1: [], 2: [], 3: [] };
+const INITIAL_MEDIA: MediaStore = { 
+  0: [{ type: 'video', src: '/media/ev_project.mp4', poster: '/media/ev_thumbnail.png' }], 
+  1: [], 2: [], 3: [] 
+};
 
 function readFiles(files: FileList): Promise<Array<{ type: 'image' | 'video'; src: string }>> {
   return Promise.all(

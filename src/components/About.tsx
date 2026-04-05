@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react';
 
 const skills = [
-  { name: 'SQL / PostgreSQL', pct: 85 },
-  { name: 'Python (Pandas, NumPy)', pct: 78 },
-  { name: 'Tableau / Power BI', pct: 80 },
-  { name: 'Excel / Google Sheets', pct: 90 },
-  { name: 'Data Visualization', pct: 82 },
-  { name: 'Statistical Analysis', pct: 75 },
+  { name: 'Power BI (DAX) & Tableau', pct: 85 },
+  { name: 'SQL & Data Management', pct: 80 },
+  { name: 'Excel (Advanced)', pct: 90 },
+  { name: 'Quality Analysis', pct: 85 },
+  { name: 'Data Cleaning & Prep', pct: 80 },
+  { name: 'Visual Storytelling', pct: 75 },
 ];
 
 const tools = [
-  'Python','SQL','Tableau','Power BI','Excel','Pandas',
-  'Matplotlib','Seaborn','Google Analytics','BigQuery','Jupyter','Git',
+  'Power BI','SQL','Excel','Tableau','DAX','Pandas',
+  'Data Cleaning','Quality Assurance',
 ];
 
 export default function About() {

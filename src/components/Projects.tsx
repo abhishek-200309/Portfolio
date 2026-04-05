@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { MediaStore } from '../types';
 
 interface ProjectsProps {
@@ -13,12 +13,12 @@ const projects = [
   {
     id: 0,
     featured: true,
-    icon: '📊',
+    icon: '⚡',
     iconClass: 'bg-accent2/10',
-    tag: 'Capstone Project',
-    name: 'E-Commerce Sales Dashboard',
-    desc: 'Built an end-to-end Tableau dashboard analyzing 2 years of e-commerce sales data across 50K+ transactions. Identified seasonal trends, top-performing SKUs, and regional gaps — resulting in a 15% hypothetical revenue uplift recommendation.',
-    stack: ['Tableau', 'SQL', 'Excel', 'Python'],
+    tag: 'Data Analytics Project',
+    name: 'The Rise of Electric Vehicles in India',
+    desc: 'Built an end-to-end Power BI dashboard to analyze the EV transition in India (2015–2024). Focused on adoption patterns, category shifts, and manufacturer leadership.',
+    stack: ['Power BI', 'SQL', 'Excel', 'DAX'],
     links: [{ label: '→ Live Dashboard', href: '#' }, { label: 'GitHub', href: '#', ghost: true }],
   },
   {
@@ -58,10 +58,29 @@ const projects = [
 
 function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: MediaStore; onClick: () => void }) {
   const items = mediaStore[pid] ?? [];
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsPlaying(true);
+    videoRef.current?.play().catch(() => {});
+  };
+
+  const handleMouseLeave = () => {
+    setIsPlaying(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      // Keep it frozen at the first frame when leaving hover
+      videoRef.current.currentTime = 0;
+    }
+  };
+
   return (
     <div
       onClick={onClick}
-      className="w-full h-40 rounded-xl overflow-hidden bg-surface2 border border-border relative cursor-pointer flex-shrink-0 group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="w-full aspect-video rounded-xl overflow-hidden bg-surface2 border border-border relative cursor-pointer flex-shrink-0 group flex items-center justify-center"
     >
       {items.length === 0 ? (
         <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-text-dim">
@@ -71,8 +90,13 @@ function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: M
       ) : (
         <>
           {items[0].type === 'video'
-            ? <video src={items[0].src} muted className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]" />
-            : <img src={items[0].src} alt="project screenshot" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]" />
+            ? <>
+                {items[0].poster && !isPlaying && (
+                  <img src={items[0].poster} alt="thumbnail" onError={(e) => e.currentTarget.style.display = 'none'} className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover:scale-[1.04] z-10" />
+                )}
+                <video ref={videoRef} src={items[0].src} loop muted playsInline controlsList="nodownload noplaybackrate" disablePictureInPicture className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]" />
+              </>
+            : <img src={items[0].src} alt="project screenshot" className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]" />
           }
           {items.length > 1 && (
             <div className="absolute bottom-2 right-2 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded pointer-events-none">
@@ -117,7 +141,7 @@ export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenMa
           <div
             key={p.id}
             data-pid={p.id}
-            className={`project-card bg-surface border border-border rounded-2xl p-8 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden hover:border-accent/30 hover:-translate-y-1 fade-up ${p.featured ? 'lg:col-span-2 bg-gradient-to-br from-surface to-accent2/5 border-accent2/30' : ''}`}
+            className={`project-card bg-surface border border-border rounded-2xl p-8 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden hover:border-accent/30 hover:-translate-y-1 hover:scale-[1.02] fade-up ${p.featured ? 'lg:col-span-2 bg-gradient-to-br from-surface to-accent2/5 border-accent2/30' : ''}`}
             style={{ animationDelay: `${i * 0.1}s` }}
           >
             <MediaPreview pid={p.id} mediaStore={mediaStore} onClick={() => onOpenLightbox(p.id)} />
