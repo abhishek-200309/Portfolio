@@ -43,7 +43,7 @@ const projects = [
       overview: 'Architected a comprehensive relational database system to streamline hospital administration. The project focused on transforming raw operational data into actionable clinical and financial insights based on a 200-patient dataset.',
       technologies: ['MySQL for relational modeling and data storage', 'Complex Joins & CTEs for multi-table reporting', 'Window Functions for ranking doctor performance and revenue tracking', 'ER Diagramming for database normalization (3NF)'],
       challenges: 'A key challenge was calculating "Patient Stay Duration" accurately while handling null discharge dates for currently admitted patients (20% of cases). This was solved using COALESCE with CURDATE(). Additionally, I implemented a robust billing logic that joins the Admission, Treatment, and Medical Test tables to compute accurate totals per patient stay.',
-      outcomes: 'Achieved a perfectly balanced 1:1 gender ratio across 200 patients. Successfully tracked 320 appointments and 140 admissions across 20 specialized departments. The analysis identified the busiest period as Jan-May 2025, with an even workload distribution and a 75% billing collection rate.'
+      outcomes: 'Achieved a perfectly balanced 1:1 gender ratio across 200 patients. Successfully tracked 320 appointments and 140 admissions across 20 specialized departments. The analysis identified Jan-May 2025 as the busiest period, with a total hospital revenue of $2.32M and a 60% billing collection rate.'
     }
   },
   {

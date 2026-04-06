@@ -210,11 +210,11 @@ export default function ProjectInsights({ project, media = [], onClose }: Props)
           {project.id === 1 && (
             <section className="space-y-12 animate-fade-in">
               <h3 className="text-xl font-medium text-text mb-8 border-b border-border/50 pb-3 flex items-center gap-3">
-                <span className="text-xl opacity-80">📈</span> Live Analytics Dashboard
+                <span className="text-xl opacity-80">📊</span> Core Project Analytics
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* 1. Gender Composition */}
+                {/* 1. Patient Demographics & Distribution */}
                 <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl">
                   <h4 className="text-sm font-medium text-text mb-6">Patient Gender Composition</h4>
                   <div className="flex items-center gap-4 mb-4">
@@ -242,24 +242,77 @@ export default function ProjectInsights({ project, media = [], onClose }: Props)
                   <p className="text-[10px] text-text-muted mt-6 italic">Derived from 200 patient registration records across the defined modulo logic.</p>
                 </div>
 
-                {/* 2. Admission Pipeline */}
-                <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl">
-                  <h4 className="text-sm font-medium text-text mb-6">Monthly Admission Pipeline</h4>
-                  <div className="flex items-end justify-between h-32 gap-3 px-2">
-                    {[
-                      { m: 'JAN', h: 'h-24', v: 26 },
-                      { m: 'FEB', h: 'h-28', v: 30 },
-                      { m: 'MAR', h: 'h-25', v: 27 },
-                      { m: 'APR', h: 'h-26', v: 29 },
-                      { m: 'MAY', h: 'h-27', v: 28 }
-                    ].map((item) => (
-                      <div key={item.m} className="flex-1 flex flex-col items-center gap-2">
-                        <div className={`w-full bg-accent/30 rounded-t-lg transition-all hover:bg-accent/60 ${item.h} border-x border-t border-accent/20`} title={`${item.m}: ${item.v} Admissions`} />
-                        <span className="text-[9px] font-mono text-text-dim">{item.m}</span>
-                      </div>
-                    ))}
+                {/* 2. Admission Pipeline (Interactive Line Chart Upgrade) */}
+                <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl flex flex-col min-h-[220px]">
+                  <h4 className="text-sm font-medium text-text mb-8">Monthly Admission Pipeline</h4>
+                  <div className="flex-1 relative mt-2 px-2">
+                    <svg viewBox="0 0 400 120" className="w-full h-32 overflow-visible">
+                      <defs>
+                        <linearGradient id="hosp-gradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      
+                      {/* Area Fill */}
+                      <path 
+                        d="M 20,13 L 110,22.5 L 200,13 L 290,16 L 380,47.5 V 120 H 20 Z" 
+                        fill="url(#hosp-gradient)" 
+                        className="transition-all duration-1000 ease-in-out opacity-60"
+                      />
+                      
+                      {/* Grid Lines */}
+                      <line x1="20" y1="120" x2="380" y2="120" stroke="currentColor" className="text-border/30" strokeWidth="1" />
+                      
+                      {/* Main Data Line */}
+                      <path 
+                        d="M 20,13 L 110,22.5 L 200,13 L 290,16 L 380,47.5" 
+                        fill="none" 
+                        stroke="var(--accent)" 
+                        strokeWidth="3" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        className="drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                      />
+                      
+                      {/* Data Points */}
+                      {[
+                        { x: 20, y: 13, v: '31', m: 'JAN' },
+                        { x: 110, y: 22.5, v: '28', m: 'FEB' },
+                        { x: 200, y: 13, v: '31', m: 'MAR' },
+                        { x: 290, y: 16, v: '30', m: 'APR' },
+                        { x: 380, y: 47.5, v: '20', m: 'MAY' },
+                      ].map((pt, i) => (
+                        <g key={i} className="group/pt">
+                          <circle 
+                            cx={pt.x} 
+                            cy={pt.y} 
+                            r="5" 
+                            fill="var(--background)" 
+                            stroke="var(--accent)" 
+                            strokeWidth="2" 
+                            className="transition-all duration-300 group-hover/pt:r-7 group-hover/pt:stroke-white cursor-help"
+                          />
+                          <text 
+                            x={pt.x} 
+                            y={pt.y - 12} 
+                            textAnchor="middle" 
+                            className="font-mono text-[10px] fill-text-dim opacity-0 group-hover/pt:opacity-100 transition-opacity pointer-events-none"
+                          >
+                            {pt.v}
+                          </text>
+                        </g>
+                      ))}
+                    </svg>
+                    
+                    {/* X-Axis Labels */}
+                    <div className="flex justify-between mt-4 px-0">
+                      {['JAN', 'FEB', 'MAR', 'APR', 'MAY'].map((m) => (
+                        <span key={m} className="text-[9px] font-mono text-text-dim text-center w-8">{m}</span>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-[10px] text-text-muted mt-4 italic text-center">Trend analysis of 140 admissions (Q1-Q2 2025).</p>
+                  <p className="text-[10px] text-text-muted mt-6 italic text-center">Trend analysis of 140 admissions (Q1-Q2 2025).</p>
                 </div>
               </div>
 
@@ -282,11 +335,94 @@ export default function ProjectInsights({ project, media = [], onClose }: Props)
                 </div>
                 <p className="text-[10px] text-text-muted mt-6 italic">Verification Note: Each of the 20 departments (Building A-T) reached peak consistency with 7 admissions each.</p>
               </div>
+
+              {/* 4. Hospital Revenue Trends (New Chart) */}
+              <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl flex flex-col min-h-[220px]">
+                <h4 className="text-sm font-medium text-text mb-8">Monthly Revenue Trends (2025)</h4>
+                <div className="flex-1 relative mt-2 px-2">
+                  <svg viewBox="0 0 400 120" className="w-full h-32 overflow-visible">
+                    <defs>
+                      <linearGradient id="rev-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--accent2)" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="var(--accent2)" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Area Fill */}
+                    <path 
+                      d="M 20,13 L 110,22.5 L 200,13 L 290,16 L 380,47.5 V 120 H 20 Z" 
+                      fill="url(#rev-gradient)" 
+                      className="transition-all duration-1000 ease-in-out opacity-60"
+                    />
+                    
+                    {/* Grid Lines */}
+                    <line x1="20" y1="120" x2="380" y2="120" stroke="currentColor" className="text-border/30" strokeWidth="1" />
+                    
+                    {/* Main Data Line */}
+                    <path 
+                      d="M 20,13 L 110,22.5 L 200,13 L 290,16 L 380,47.5" 
+                      fill="none" 
+                      stroke="var(--accent2)" 
+                      strokeWidth="3" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="drop-shadow-[0_0_8px_rgba(167,139,250,0.5)]"
+                    />
+                    
+                    {/* Data Points */}
+                    {[
+                      { x: 20, y: 13, v: '$513K' },
+                      { x: 110, y: 22.5, v: '$464K' },
+                      { x: 200, y: 13, v: '$513K' },
+                      { x: 290, y: 16, v: '$497K' },
+                      { x: 380, y: 47.5, v: '$331K' },
+                    ].map((pt, i) => (
+                      <g key={i} className="group/pt">
+                        <circle 
+                          cx={pt.x} 
+                          cy={pt.y} 
+                          r="5" 
+                          fill="var(--background)" 
+                          stroke="var(--accent2)" 
+                          strokeWidth="2" 
+                          className="transition-all duration-300 group-hover/pt:r-7 group-hover/pt:stroke-white cursor-help"
+                        />
+                        <text 
+                          x={pt.x} 
+                          y={pt.y - 12} 
+                          textAnchor="middle" 
+                          className="font-mono text-[10px] fill-text-dim opacity-0 group-hover/pt:opacity-100 transition-opacity pointer-events-none"
+                        >
+                          {pt.v}
+                        </text>
+                      </g>
+                    ))}
+                  </svg>
+                  
+                  {/* X-Axis Labels */}
+                  <div className="flex justify-between mt-4 px-0">
+                    {['JAN', 'FEB', 'MAR', 'APR', 'MAY'].map((m) => (
+                      <span key={m} className="text-[9px] font-mono text-text-dim text-center w-8">{m}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-8 flex items-center justify-between px-2 pt-4 border-t border-border/20">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-mono text-text-muted uppercase tracking-wider">Total Revenue</span>
+                    <span className="text-lg font-mono text-accent2">$2,320,000</span>
+                  </div>
+                  <div className="flex flex-col text-right">
+                    <span className="text-[10px] font-mono text-text-muted uppercase tracking-wider">Collection Rate</span>
+                    <span className="text-lg font-mono text-accent">60.0%</span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-text-muted mt-6 italic text-center">Financial performance data aggregated across 140 admissions and outpatient billing.</p>
+              </div>
             </section>
           )}
 
-          {/* Featured Chart (Main Image) - Placed below dashboard */}
-          {media.length > 1 && (
+          {/* Global Distribution - Hidden for Project 1 as it overlaps with Core Analytics */}
+          {media.length > 1 && project.id !== 1 && (
             <section className="animate-fade-in">
               <h3 className="text-xl font-medium text-text mb-6 border-b border-border/50 pb-3 flex items-center gap-3">
                 <span className="text-xl opacity-80">📊</span> Global Distribution
