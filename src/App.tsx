@@ -53,6 +53,7 @@ function readFiles(files: FileList): Promise<Array<{ type: 'image' | 'video'; sr
 export default function App() {
   const [mediaStore, setMediaStore] = useState<MediaStore>(INITIAL_MEDIA);
   const [activeSection, setActiveSection] = useState('hero');
+  const [view, setView] = useState<'home' | 'projects'>('home');
 
   // Owner auth
   const [isOwner, setIsOwner] = useState(() => isOwnerSession());
@@ -103,7 +104,7 @@ export default function App() {
     );
     document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+  }, [view]);
 
   // Lightbox handlers
   const openLightbox = useCallback((pid: number, startIdx = 0) => {
@@ -140,6 +141,16 @@ export default function App() {
     setAuthOpen(false);
   };
 
+  const handleViewAll = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setView('projects');
+  };
+
+  const handleBackToHome = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setView('home');
+  };
+
   const handleAddFiles = async (pid: number, files: FileList) => {
     const newItems = await readFiles(files);
     setMediaStore(prev => ({
@@ -166,19 +177,43 @@ export default function App() {
     <>
       <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); sessionStorage.removeItem('am_portfolio_owner'); }} onOwnerLogin={() => setAuthOpen(true)} />
 
-      <main>
-        <Hero />
-        <About />
-        <Projects
-          mediaStore={mediaStore}
-          isOwner={isOwner}
-          onOpenLightbox={openLightbox}
-          onOpenManage={openManage}
-          onOpenInsights={handleOpenInsights}
-        />
-        <Experience />
-        <Certifications />
-        <Contact />
+      <main className="animate-fade-in transition-all duration-700">
+        {view === 'home' ? (
+          <>
+            <Hero />
+            <About />
+            <Projects
+              mediaStore={mediaStore}
+              isOwner={isOwner}
+              onOpenLightbox={openLightbox}
+              onOpenManage={openManage}
+              onOpenInsights={handleOpenInsights}
+              limit={2}
+              onViewAll={handleViewAll}
+            />
+            <Experience />
+            <Certifications />
+            <Contact />
+          </>
+        ) : (
+          <div className="pt-20 min-h-screen animate-slide-up">
+            <div className="max-w-[1200px] mx-auto px-12 pt-12">
+              <button 
+                onClick={handleBackToHome}
+                className="group flex items-center gap-2 text-text-muted font-mono text-xs hover:text-accent transition-colors mb-4"
+              >
+                <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Home
+              </button>
+            </div>
+            <Projects
+              mediaStore={mediaStore}
+              isOwner={isOwner}
+              onOpenLightbox={openLightbox}
+              onOpenManage={openManage}
+              onOpenInsights={handleOpenInsights}
+            />
+          </div>
+        )}
       </main>
 
       <Footer />

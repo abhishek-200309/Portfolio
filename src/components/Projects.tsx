@@ -7,6 +7,8 @@ interface ProjectsProps {
   onOpenLightbox: (pid: number) => void;
   onOpenManage: (pid: number, name: string) => void;
   onOpenInsights: (pid: number) => void;
+  limit?: number; // Optional limit for main page
+  onViewAll?: () => void; // Callback for "View More" button
 }
 
 const projects = [
@@ -145,16 +147,17 @@ function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: M
   );
 }
 
-export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenManage, onOpenInsights }: ProjectsProps) {
+export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenManage, onOpenInsights, limit, onViewAll }: ProjectsProps) {
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const displayedProjects = limit ? projects.slice(0, limit) : projects;
 
   return (
-    <section id="projects" className="relative z-[1] py-24 px-12 max-w-[1200px] mx-auto">
+    <section id="projects" className="relative z-[1] py-24 px-12 max-w-[1200px] mx-auto transition-all duration-500">
       <div className="flex justify-between items-end mb-0">
         <div>
           <div className="section-label">Selected work</div>
-          <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] leading-[1.1] tracking-[-0.01em] mb-0">
-            Projects that show<br />what I can do
+          <h2 className="font-serif text-[clamp(18px,3.5vw,48px)] leading-[1.1] tracking-[-0.01em] mb-0">
+            {limit ? 'Featured Projects' : 'All Projects'}
           </h2>
         </div>
         {isOwner ? (
@@ -173,11 +176,11 @@ export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenMa
       <div className="h-8" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {projects.map((p, i) => (
+        {displayedProjects.map((p, i) => (
           <div
             key={p.id}
             data-pid={p.id}
-            className={`project-card bg-surface border border-border rounded-2xl p-8 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden hover:border-accent/30 hover:-translate-y-1 hover:scale-[1.02] fade-up ${p.featured ? 'lg:col-span-2 bg-gradient-to-br from-surface to-accent2/5 border-accent2/30' : ''}`}
+            className={`project-card bg-surface border border-border rounded-2xl p-8 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden hover:border-accent/30 hover:-translate-y-1 hover:scale-[1.02] fade-up visible ${p.featured ? 'lg:col-span-2 bg-gradient-to-br from-surface to-accent2/5 border-accent2/30' : ''}`}
             style={{ animationDelay: `${i * 0.1}s` }}
           >
             <MediaPreview pid={p.id} mediaStore={mediaStore} onClick={() => onOpenLightbox(p.id)} />
@@ -233,6 +236,19 @@ export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenMa
           </div>
         ))}
       </div>
+
+      {limit && onViewAll && (
+        <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <button 
+            onClick={onViewAll}
+            className="group relative inline-flex items-center gap-3 bg-surface border border-border px-8 py-4 rounded-full font-mono text-[13px] tracking-[0.05em] text-text hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-accent/10"
+          >
+            <span className="relative z-10 uppercase">View All Projects</span>
+            <span className="relative z-10 text-accent group-hover:translate-x-1 transition-transform duration-300">→</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/5 to-accent2/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </button>
+        </div>
+      )}
     </section>
   );
 }
