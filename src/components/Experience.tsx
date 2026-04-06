@@ -27,7 +27,7 @@ export default function Experience() {
       <div className="timeline relative pl-8 fade-up">
         {timeline.map((item, i) => (
           <div key={i} className="timeline-item relative mb-12">
-            <div className="font-mono text-[11px] text-text-dim tracking-[0.08em] mb-2">{item.date}</div>
+            <div className="font-mono text-[12px] text-text-muted tracking-[0.08em] mb-2">{item.date}</div>
             <div className="font-serif text-[22px] text-text mb-1">{item.role}</div>
             <div className="font-mono text-[13px] text-accent2 mb-4">{item.org}</div>
             <ul className="list-none flex flex-col gap-2">

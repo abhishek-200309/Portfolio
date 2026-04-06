@@ -26,11 +26,11 @@ const projects = [
     featured: false,
     icon: '🏥',
     iconClass: 'bg-accent/10',
-    tag: 'SQL Analysis',
-    name: 'Hospital Readmission Analysis',
-    desc: 'Analyzed 30-day readmission rates across departments using PostgreSQL. Identified 3 high-risk patient cohorts using cohort analysis and window functions.',
-    stack: ['PostgreSQL', 'Python'],
-    links: [{ label: '→ View Report', href: '#' }, { label: 'GitHub', href: '#', ghost: true }],
+    tag: 'SQL Analytics',
+    name: 'Hospital Management Analytics',
+    desc: 'Designed a relational database for hospital operations. Conducted extensive demographic, appointment, and revenue analysis using SQL Joins and Window Functions.',
+    stack: ['MySQL', 'Database Design', 'Data Analytics'],
+    links: [{ label: '→ View Queries', href: 'https://github.com/abhishek-200309/Hospital-Management/blob/main/project_analysis.sql' }, { label: 'GitHub', href: 'https://github.com/abhishek-200309/Hospital-Management', ghost: true }],
   },
   {
     id: 2,
@@ -122,12 +122,12 @@ export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenMa
           </h2>
         </div>
         {isOwner ? (
-          <div className="font-mono text-[11px] text-text-dim text-right leading-[1.7] pb-1.5 hidden md:block">
+          <div className="font-mono text-[12px] text-text-muted text-right leading-[1.7] pb-1.5 hidden md:block">
             Click <span className="text-accent">+ Add Media</span> on any card<br />
             to upload screenshots or videos
           </div>
         ) : (
-          <div className="font-mono text-[11px] text-text-dim text-right leading-[1.7] pb-1.5 hidden md:block">
+          <div className="font-mono text-[12px] text-text-muted text-right leading-[1.7] pb-1.5 hidden md:block">
             Projects showcase <span className="text-accent">real analysis</span><br />
             and interactive dashboards
           </div>
