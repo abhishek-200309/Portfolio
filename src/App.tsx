@@ -12,7 +12,8 @@ import Footer from './components/Footer';
 import Lightbox from './components/Lightbox';
 import ManageModal from './components/ManageModal';
 import ProjectInsights from './components/ProjectInsights';
-import OwnerAuth, { isOwnerSession } from './components/OwnerAuth';
+import OwnerAuth from './components/OwnerAuth';
+import { clearOwnerSession, isOwnerSession } from './components/ownerSession';
 
 import type { MediaStore } from './types';
 
@@ -175,7 +176,7 @@ export default function App() {
 
   return (
     <>
-      <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); sessionStorage.removeItem('am_portfolio_owner'); }} onOwnerLogin={() => setAuthOpen(true)} />
+      <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); clearOwnerSession(); }} onOwnerLogin={() => setAuthOpen(true)} />
 
       <main className="animate-fade-in transition-all duration-700">
         {view === 'home' ? (
@@ -246,11 +247,12 @@ export default function App() {
         />
       )}
 
-      <OwnerAuth
-        isOpen={authOpen}
-        onSuccess={handleAuthSuccess}
-        onClose={handleAuthClose}
-      />
+      {authOpen && (
+        <OwnerAuth
+          onSuccess={handleAuthSuccess}
+          onClose={handleAuthClose}
+        />
+      )}
     </>
   );
 }
