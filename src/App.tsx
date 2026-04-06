@@ -57,8 +57,6 @@ export default function App() {
   // Owner auth
   const [isOwner, setIsOwner] = useState(() => isOwnerSession());
   const [authOpen, setAuthOpen] = useState(false);
-  // Pending action after auth success (to open manage modal for a specific project)
-  const [pendingManage, setPendingManage] = useState<{ pid: number; name: string } | null>(null);
 
   // Lightbox state
   const [lbOpen, setLbOpen] = useState(false);
@@ -133,25 +131,13 @@ export default function App() {
   };
   const closeManage = () => setManageOpen(false);
 
-  // Owner auth — called when a visitor clicks the locked 🔒 button
-  const handleRequestOwnerAuth = (pid: number, name: string) => {
-    setPendingManage({ pid, name });
-    setAuthOpen(true);
-  };
-
   const handleAuthSuccess = () => {
     setIsOwner(true);
     setAuthOpen(false);
-    // If triggered from a specific project card, open that manage modal immediately
-    if (pendingManage) {
-      openManage(pendingManage.pid, pendingManage.name);
-      setPendingManage(null);
-    }
   };
 
   const handleAuthClose = () => {
     setAuthOpen(false);
-    setPendingManage(null);
   };
 
   const handleAddFiles = async (pid: number, files: FileList) => {
@@ -188,7 +174,6 @@ export default function App() {
           isOwner={isOwner}
           onOpenLightbox={openLightbox}
           onOpenManage={openManage}
-          onRequestOwnerAuth={handleRequestOwnerAuth}
           onOpenInsights={handleOpenInsights}
         />
         <Experience />

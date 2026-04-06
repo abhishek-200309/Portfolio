@@ -6,7 +6,6 @@ interface ProjectsProps {
   isOwner: boolean;
   onOpenLightbox: (pid: number) => void;
   onOpenManage: (pid: number, name: string) => void;
-  onRequestOwnerAuth: (pid: number, name: string) => void;
   onOpenInsights: (pid: number) => void;
 }
 
@@ -121,7 +120,17 @@ function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: M
                 {items[0].poster && !isPlaying && (
                   <img src={items[0].poster} alt="thumbnail" onError={(e) => e.currentTarget.style.display = 'none'} className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover:scale-[1.04] z-10" />
                 )}
-                <video ref={videoRef} src={items[0].src} loop muted playsInline controlsList="nodownload noplaybackrate" disablePictureInPicture className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]" />
+                <video 
+                  ref={videoRef} 
+                  src={items[0].src} 
+                  loop 
+                  muted 
+                  playsInline 
+                  preload="auto"
+                  controlsList="nodownload noplaybackrate" 
+                  disablePictureInPicture 
+                  className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]" 
+                />
               </>
             : <img src={items[0].src} alt="project screenshot" className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]" />
           }
@@ -136,7 +145,7 @@ function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: M
   );
 }
 
-export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenManage, onRequestOwnerAuth, onOpenInsights }: ProjectsProps) {
+export default function Projects({ mediaStore, isOwner, onOpenLightbox, onOpenManage, onOpenInsights }: ProjectsProps) {
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   return (
