@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useRef, useState } from 'react';
 import type { MediaStore } from '../types';
+import { evProjectDashboard } from '../data/evDashboardData';
 
 interface ProjectsProps {
   mediaStore: MediaStore;
@@ -58,6 +59,14 @@ interface DashboardContent {
   gridSections?: ProjectDashboardSection[];
   wideSections?: ProjectDashboardSection[];
   layout?: 'grid-first' | 'wide-first';
+}
+
+export type ProjectDashboardContent = DashboardContent;
+
+export interface ProjectDashboardResolverContext {
+  selectedState: string;
+  activeVariantKey: string;
+  fallbackContent: ProjectDashboardContent;
 }
 
 export interface ProjectBarSection extends ProjectDashboardSectionBase {
@@ -118,6 +127,13 @@ export interface ProjectDashboard extends DashboardContent {
   heading: string;
   filtersLabel?: string;
   variants?: ProjectDashboardVariant[];
+  helperText?: string;
+  stateFilter?: {
+    label: string;
+    options: string[];
+    defaultValue?: string;
+  };
+  resolveContent?: (context: ProjectDashboardResolverContext) => ProjectDashboardContent;
 }
 
 export interface ProjectInsightsContent {
@@ -165,235 +181,7 @@ const projects: Project[] = [
       ],
       challenges: 'Handling missing geographic data across various states required mapping custom regions. Optimizing DAX queries for a large dataset (over 1M rows) to ensure the dashboard remained responsive was a significant hurdle. Furthermore, aligning public data sources with differing formats demanded rigorous ETL processes.',
       outcomes: 'Delivered an interactive dashboard that clearly highlighted the 300% YoY growth in 2-wheeler EVs and identified key states leading the transition, providing actionable insights for infrastructure planning.',
-      dashboard: {
-        badge: 'EV',
-        heading: 'Market Adoption Insights',
-        filtersLabel: 'Vehicle',
-        variants: [
-          {
-            key: 'all',
-            label: 'All',
-            layout: 'wide-first',
-            metrics: [
-              { label: 'Total EV Registrations', value: '4.42M', tone: 'accent' },
-              { label: 'Avg Annual EV Registrations', value: '2.40K', tone: 'accent' },
-            ],
-            wideSections: [
-              {
-                kind: 'line',
-                title: 'EV Adoption Trend (2015-2024)',
-                tone: 'accent',
-                xAxisLabel: 'Years',
-                yAxisLabels: ['2M', '1M', '0M'],
-                points: [
-                  { label: '2015', value: 7750, displayValue: '7.75K' },
-                  { label: '2016', value: 49250, displayValue: '49.25K' },
-                  { label: '2017', value: 87020, displayValue: '87.02K' },
-                  { label: '2018', value: 129760, displayValue: '129.76K' },
-                  { label: '2019', value: 165790, displayValue: '165.79K' },
-                  { label: '2020', value: 123770, displayValue: '123.77K' },
-                  { label: '2021', value: 328850, displayValue: '328.85K' },
-                  { label: '2022', value: 1020530, displayValue: '1020.53K' },
-                  { label: '2023', value: 1529230, displayValue: '1529.23K' },
-                  { label: '2024', value: 978940, displayValue: '978.94K' },
-                ],
-              },
-            ],
-            gridSections: [
-              {
-                kind: 'columns',
-                title: 'Leading EV Manufacturers',
-                tone: 'accent',
-                xAxisLabel: 'Manufacturer',
-                yAxisLabels: ['0.5M', '0.0M'],
-                items: [
-                  { label: 'Hero MotoCorp', value: 620000, displayValue: '0.62M' },
-                  { label: 'Tata Motors', value: 410000, displayValue: '0.41M' },
-                  { label: 'Ather Energy', value: 330000, displayValue: '0.33M' },
-                  { label: 'Greaves Cotton', value: 310000, displayValue: '0.31M' },
-                  { label: 'TVS Motor', value: 220000, displayValue: '0.22M' },
-                ],
-              },
-              {
-                kind: 'donut',
-                title: 'EV Adoption by Vehicle Category',
-                legendTitle: 'vehicle_category',
-                totalDisplayValue: '4.42M',
-                segments: [
-                  { label: 'Four Wheeler', value: 207298, displayValue: '0.21M', tone: 'accent' },
-                  { label: 'Three Wheeler', value: 1933750, displayValue: '1.93M', tone: 'accent2' },
-                  { label: 'Two Wheeler', value: 2279952, displayValue: '2.28M', tone: 'accent4' },
-                ],
-              },
-            ],
-          },
-          {
-            key: 'two-wheeler',
-            label: 'Two Wheeler',
-            layout: 'wide-first',
-            metrics: [
-              { label: 'Total EV Registrations', value: '2.28M', tone: 'accent4' },
-              { label: 'Avg Annual EV Registrations', value: '3.80K', tone: 'accent' },
-            ],
-            wideSections: [
-              {
-                kind: 'line',
-                title: 'EV Adoption Trend (2015-2024)',
-                tone: 'accent',
-                xAxisLabel: 'Years',
-                yAxisLabels: ['1.0M', '0.5M', '0.0M'],
-                points: [
-                  { label: '2015', value: 1440, displayValue: '1.44K' },
-                  { label: '2016', value: 1400, displayValue: '1.4K' },
-                  { label: '2017', value: 1530, displayValue: '1.53K' },
-                  { label: '2018', value: 17080, displayValue: '17.08K' },
-                  { label: '2019', value: 30380, displayValue: '30.38K' },
-                  { label: '2020', value: 29120, displayValue: '29.12K' },
-                  { label: '2021', value: 156320, displayValue: '156.32K' },
-                  { label: '2022', value: 631390, displayValue: '631.39K' },
-                  { label: '2023', value: 860400, displayValue: '860.4K' },
-                  { label: '2024', value: 550350, displayValue: '550.35K' },
-                ],
-              },
-            ],
-            gridSections: [
-              {
-                kind: 'columns',
-                title: 'Leading EV Manufacturers',
-                tone: 'accent',
-                xAxisLabel: 'Manufacturer',
-                yAxisLabels: ['0.5M', '0.0M'],
-                items: [
-                  { label: 'Hero MotoCorp', value: 590000, displayValue: '0.59M' },
-                  { label: 'Tata Motors', value: 310000, displayValue: '0.31M' },
-                  { label: 'Greaves Cotton', value: 270000, displayValue: '0.27M' },
-                  { label: 'Ather Energy', value: 200000, displayValue: '0.20M' },
-                  { label: 'BYD India', value: 200000, displayValue: '0.20M' },
-                ],
-              },
-              {
-                kind: 'donut',
-                title: 'EV Adoption by Vehicle Category',
-                legendTitle: 'vehicle_category',
-                totalDisplayValue: '2.28M',
-                segments: [
-                  { label: 'Two Wheeler', value: 2279952, displayValue: '2.28M', tone: 'accent4' },
-                ],
-              },
-            ],
-          },
-          {
-            key: 'three-wheeler',
-            label: 'Three Wheeler',
-            layout: 'wide-first',
-            metrics: [
-              { label: 'Total EV Registrations', value: '1.93M', tone: 'accent2' },
-              { label: 'Avg Annual EV Registrations', value: '3.12K', tone: 'accent' },
-            ],
-            wideSections: [
-              {
-                kind: 'line',
-                title: 'EV Adoption Trend (2015-2024)',
-                tone: 'accent',
-                xAxisLabel: 'Years',
-                yAxisLabels: ['0.5M', '0.0M'],
-                points: [
-                  { label: '2015', value: 5420, displayValue: '5.42K' },
-                  { label: '2016', value: 46910, displayValue: '46.91K' },
-                  { label: '2017', value: 83350, displayValue: '83.35K' },
-                  { label: '2018', value: 110180, displayValue: '110.18K' },
-                  { label: '2019', value: 133500, displayValue: '133.5K' },
-                  { label: '2020', value: 90390, displayValue: '90.39K' },
-                  { label: '2021', value: 158260, displayValue: '158.26K' },
-                  { label: '2022', value: 350550, displayValue: '350.55K' },
-                  { label: '2023', value: 583710, displayValue: '583.71K' },
-                  { label: '2024', value: 372020, displayValue: '372.02K' },
-                ],
-              },
-            ],
-            gridSections: [
-              {
-                kind: 'columns',
-                title: 'Leading EV Manufacturers',
-                tone: 'accent',
-                xAxisLabel: 'Manufacturer',
-                yAxisLabels: ['0.2M', '0.1M', '0.0M'],
-                items: [
-                  { label: 'Olectra Greentech', value: 190000, displayValue: '0.19M' },
-                  { label: 'TVS Motor', value: 140000, displayValue: '0.14M' },
-                  { label: 'Simple Energy', value: 130000, displayValue: '0.13M' },
-                  { label: 'Ather Energy', value: 115000, displayValue: '0.12M' },
-                  { label: 'Ola Electric', value: 100000, displayValue: '0.10M' },
-                ],
-              },
-              {
-                kind: 'donut',
-                title: 'EV Adoption by Vehicle Category',
-                legendTitle: 'vehicle_category',
-                totalDisplayValue: '1.93M',
-                segments: [
-                  { label: 'Three Wheeler', value: 1933750, displayValue: '1.93M', tone: 'accent2' },
-                ],
-              },
-            ],
-          },
-          {
-            key: 'four-wheeler',
-            label: 'Four Wheeler',
-            layout: 'wide-first',
-            metrics: [
-              { label: 'Total EV Registrations', value: '207.19K', tone: 'accent' },
-              { label: 'Avg Annual EV Registrations', value: '334.18', tone: 'accent' },
-            ],
-            wideSections: [
-              {
-                kind: 'line',
-                title: 'EV Adoption Trend (2015-2024)',
-                tone: 'accent',
-                xAxisLabel: 'Years',
-                yAxisLabels: ['100K', '50K', '0K'],
-                points: [
-                  { label: '2015', value: 900, displayValue: '0.9K' },
-                  { label: '2016', value: 900, displayValue: '0.9K' },
-                  { label: '2017', value: 2140, displayValue: '2.14K' },
-                  { label: '2018', value: 2510, displayValue: '2.51K' },
-                  { label: '2019', value: 1910, displayValue: '1.91K' },
-                  { label: '2020', value: 4260, displayValue: '4.26K' },
-                  { label: '2021', value: 14270, displayValue: '14.27K' },
-                  { label: '2022', value: 38590, displayValue: '38.59K' },
-                  { label: '2023', value: 85120, displayValue: '85.12K' },
-                  { label: '2024', value: 56580, displayValue: '56.58K' },
-                ],
-              },
-            ],
-            gridSections: [
-              {
-                kind: 'columns',
-                title: 'Leading EV Manufacturers',
-                tone: 'accent',
-                xAxisLabel: 'Manufacturer',
-                yAxisLabels: ['50K', '0K'],
-                items: [
-                  { label: 'TVS Motor', value: 74000, displayValue: '74K' },
-                  { label: 'Ashok Leyland', value: 53000, displayValue: '53K' },
-                  { label: 'Force Motors', value: 24000, displayValue: '24K' },
-                  { label: 'Hero Electric', value: 22000, displayValue: '22K' },
-                  { label: 'Minda Industries', value: 13000, displayValue: '13K' },
-                ],
-              },
-              {
-                kind: 'donut',
-                title: 'EV Adoption by Vehicle Category',
-                legendTitle: 'vehicle_category',
-                totalDisplayValue: '207.19K',
-                segments: [
-                  { label: 'Four Wheeler', value: 207298, displayValue: '207.19K', tone: 'accent' },
-                ],
-              },
-            ],
-          },
-        ],
-      },
+      dashboard: evProjectDashboard,
     },
   },
   {

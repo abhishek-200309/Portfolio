@@ -4,8 +4,8 @@ import type {
   ProjectBarSection,
   ProjectColumnSection,
   ProjectDashboard,
+  ProjectDashboardContent,
   ProjectDashboardSection,
-  ProjectDashboardVariant,
   ProjectDonutSection,
   ProjectLinePoint,
   ProjectLineSection,
@@ -41,12 +41,29 @@ const PLOT_LEFT = 20;
 const PLOT_RIGHT = 380;
 const PLOT_TOP = 10;
 const BASELINE_Y = 110;
-
-type DashboardContent = Pick<ProjectDashboardVariant, 'metrics' | 'gridSections' | 'wideSections' | 'layout'>;
 type ChartPoint = ProjectLinePoint & { x: number; y: number };
+
+const compactNumberFormatter = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+});
 
 function getTone(tone: AccentTone = 'accent') {
   return tonePalette[tone];
+}
+
+function formatCompactNumber(value: number) {
+  return compactNumberFormatter.format(value);
+}
+
+function buildAxisLabels(values: number[]) {
+  const maxValue = Math.max(...values, 0);
+
+  if (maxValue <= 0) {
+    return ['0', '0', '0'];
+  }
+
+  return [formatCompactNumber(maxValue), formatCompactNumber(maxValue / 2), '0'];
 }
 
 function getChartPoints(points: ProjectLinePoint[]): ChartPoint[] {
@@ -164,14 +181,15 @@ function LineSection({ section }: { section: ProjectLineSection }) {
   const chartPoints = getChartPoints(section.points);
   const linePath = buildLinePath(chartPoints);
   const areaPath = buildAreaPath(chartPoints);
+  const yAxisLabels = section.yAxisLabels ?? buildAxisLabels(section.points.map((point) => point.value));
 
   return (
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl flex flex-col min-h-[220px]">
       <h4 className="text-sm font-medium text-text mb-6">{section.title}</h4>
       <div className="flex-1 relative pl-10 pr-2 pb-9">
-        {section.yAxisLabels && (
+        {yAxisLabels.length > 0 && (
           <div className="absolute left-0 top-0 bottom-9 flex flex-col justify-between text-[10px] font-mono text-text-muted">
-            {section.yAxisLabels.map((label) => (
+            {yAxisLabels.map((label) => (
               <span key={`${section.title}-${label}`}>{label}</span>
             ))}
           </div>
@@ -264,14 +282,15 @@ function LineSection({ section }: { section: ProjectLineSection }) {
 
 function ColumnSection({ section }: { section: ProjectColumnSection }) {
   const maxValue = Math.max(...section.items.map((item) => item.value), 1);
+  const yAxisLabels = section.yAxisLabels ?? buildAxisLabels(section.items.map((item) => item.value));
 
   return (
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl">
       <h4 className="text-sm font-medium text-text mb-6 text-center">{section.title}</h4>
       <div className="relative pl-9 pr-2 pb-10 h-[210px]">
-        {section.yAxisLabels && (
+        {yAxisLabels.length > 0 && (
           <div className="absolute left-0 top-0 bottom-10 flex flex-col justify-between text-[10px] font-mono text-text-muted">
-            {section.yAxisLabels.map((label) => (
+            {yAxisLabels.map((label) => (
               <span key={`${section.title}-${label}`}>{label}</span>
             ))}
           </div>
@@ -395,10 +414,21 @@ function renderSection(section: ProjectDashboardSection, index: number) {
 export default function InsightDashboard({ dashboard }: { dashboard: ProjectDashboard }) {
   const variants = dashboard.variants ?? [];
   const [activeVariantKey, setActiveVariantKey] = useState(() => variants[0]?.key ?? 'default');
+  const stateFilter = dashboard.stateFilter;
+  const [selectedState, setSelectedState] = useState(
+    () => stateFilter?.defaultValue ?? stateFilter?.options[0] ?? 'All'
+  );
 
   const activeVariant = variants.find((variant) => variant.key === activeVariantKey) ?? variants[0];
-  const content: DashboardContent = activeVariant ?? dashboard;
+  const fallbackContent: ProjectDashboardContent = activeVariant ?? dashboard;
+  const content =
+    dashboard.resolveContent?.({
+      selectedState,
+      activeVariantKey,
+      fallbackContent,
+    }) ?? fallbackContent;
   const wideFirst = content.layout === 'wide-first';
+  const scopeLabel = selectedState === 'All' ? 'All states' : selectedState;
 
   const wideSectionMarkup =
     content.wideSections && content.wideSections.length > 0 ? (
@@ -420,33 +450,72 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
           <span>{dashboard.heading}</span>
         </h3>
 
-        {variants.length > 0 && (
-          <div className="space-y-3">
+        {stateFilter && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-surface text-[11px] font-mono text-text-muted tracking-[0.05em]">
+            <span className="text-accent">{stateFilter.label}</span>
+            <span>{scopeLabel}</span>
+          </div>
+        )}
+
+        {(variants.length > 0 || stateFilter) && (
+          <div className="space-y-4">
             {dashboard.filtersLabel && (
               <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase">
                 {dashboard.filtersLabel}
               </div>
             )}
-            <div className="flex flex-wrap gap-2">
-              {variants.map((variant) => {
-                const isActive = variant.key === activeVariantKey;
+            {variants.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {variants.map((variant) => {
+                  const isActive = variant.key === activeVariantKey;
 
-                return (
-                  <button
-                    key={variant.key}
-                    type="button"
-                    onClick={() => setActiveVariantKey(variant.key)}
-                    className={`px-4 py-2 rounded-full border font-mono text-[11px] tracking-[0.06em] transition-all duration-200 ${
-                      isActive
-                        ? 'border-accent bg-accent text-bg'
-                        : 'border-border text-text-muted bg-surface hover:border-accent/40 hover:text-text'
-                    }`}
+                  return (
+                    <button
+                      key={variant.key}
+                      type="button"
+                      onClick={() => setActiveVariantKey(variant.key)}
+                      className={`px-4 py-2 rounded-full border font-mono text-[11px] tracking-[0.06em] transition-all duration-200 ${
+                        isActive
+                          ? 'border-accent bg-accent text-bg'
+                          : 'border-border text-text-muted bg-surface hover:border-accent/40 hover:text-text'
+                      }`}
+                    >
+                      {variant.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {stateFilter && (
+              <div className="max-w-[260px] space-y-2">
+                <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase">
+                  {stateFilter.label}
+                </div>
+                <div className="relative">
+                  <select
+                    value={selectedState}
+                    onChange={(event) => setSelectedState(event.target.value)}
+                    className="w-full appearance-none rounded-xl border border-border bg-surface px-4 py-3 pr-10 text-sm text-text outline-none transition-colors hover:border-accent/40 focus:border-accent"
                   >
-                    {variant.label}
-                  </button>
-                );
-              })}
-            </div>
+                    {stateFilter.options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
+                    ▾
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {dashboard.helperText && (
+              <p className="max-w-2xl text-[11px] leading-relaxed text-text-muted">
+                {dashboard.helperText}
+              </p>
+            )}
           </div>
         )}
       </div>
