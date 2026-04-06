@@ -4,20 +4,29 @@ import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
-import Projects from './components/Projects';
+import Projects, { projects } from './components/Projects';
 import Experience from './components/Experience';
 import Certifications from './components/Certifications';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Lightbox from './components/Lightbox';
 import ManageModal from './components/ManageModal';
+import ProjectInsights from './components/ProjectInsights';
 import OwnerAuth, { isOwnerSession } from './components/OwnerAuth';
 
 import type { MediaStore } from './types';
 
 const INITIAL_MEDIA: MediaStore = { 
   0: [{ type: 'video', src: '/media/ev_project.mp4', poster: '/media/ev_thumbnail.png' }], 
-  1: [{ type: 'image', src: '/media/hospital_analytics_thumb.png' }], 
+  1: [
+    { type: 'image', src: '/media/hospital_analytics_thumb.png' },
+    { 
+      type: 'image', 
+      src: '/media/hospital_demographics.png', 
+      title: 'Core Project Analytics', 
+      description: 'Primary visualization showing a balanced 1:1 gender ratio across 200 patients. The analytical scope covers 140 admissions between Jan-May 2025.' 
+    }
+  ], 
   2: [], 3: [] 
 };
 
@@ -61,6 +70,11 @@ export default function App() {
   const [managePid, setManagePid] = useState<number | null>(null);
   const [manageName, setManageName] = useState('');
 
+  // Insights state
+  const [insightsPid, setInsightsPid] = useState<number | null>(null);
+  const handleOpenInsights = (pid: number) => setInsightsPid(pid);
+  const handleCloseInsights = () => setInsightsPid(null);
+
   // Scroll spy
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>('section[id]');
@@ -96,7 +110,6 @@ export default function App() {
   // Lightbox handlers
   const openLightbox = useCallback((pid: number, startIdx = 0) => {
     if ((mediaStore[pid] ?? []).length === 0) {
-      openManage(pid, '');
       return;
     }
     setLbPid(pid);
@@ -176,6 +189,7 @@ export default function App() {
           onOpenLightbox={openLightbox}
           onOpenManage={openManage}
           onRequestOwnerAuth={handleRequestOwnerAuth}
+          onOpenInsights={handleOpenInsights}
         />
         <Experience />
         <Certifications />
@@ -203,6 +217,14 @@ export default function App() {
         onDeleteFile={handleDeleteFile}
         onClickThumb={handleClickThumb}
       />
+
+      {insightsPid !== null && (
+        <ProjectInsights 
+          project={projects.find(p => p.id === insightsPid)!} 
+          media={mediaStore[insightsPid] ?? []}
+          onClose={handleCloseInsights} 
+        />
+      )}
 
       <OwnerAuth
         isOpen={authOpen}

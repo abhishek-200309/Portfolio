@@ -21,7 +21,7 @@ export default function Contact() {
         <a href="https://linkedin.com/in/abhishek-kumar-1617a9200" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 px-8 py-4 rounded-lg font-mono text-[13px] tracking-[0.04em] no-underline border border-border text-text-muted transition-all duration-200 hover:text-text hover:border-text-muted hover:-translate-y-0.5">
           <span>in</span> LinkedIn
         </a>
-        <a href="#" className="inline-flex items-center gap-2.5 px-8 py-4 rounded-lg font-mono text-[13px] tracking-[0.04em] no-underline border border-border text-text-muted transition-all duration-200 hover:text-text hover:border-text-muted hover:-translate-y-0.5">
+        <a href="https://github.com/abhishek-200309" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 px-8 py-4 rounded-lg font-mono text-[13px] tracking-[0.04em] no-underline border border-border text-text-muted transition-all duration-200 hover:text-text hover:border-text-muted hover:-translate-y-0.5">
           <span>⌂</span> GitHub
         </a>
         <a href="#" className="inline-flex items-center gap-2.5 px-8 py-4 rounded-lg font-mono text-[13px] tracking-[0.04em] no-underline border border-border text-text-muted transition-all duration-200 hover:text-text hover:border-text-muted hover:-translate-y-0.5">
