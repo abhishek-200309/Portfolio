@@ -54,7 +54,8 @@ function readFiles(files: FileList): Promise<Array<{ type: 'image' | 'video'; sr
 export default function App() {
   const [mediaStore, setMediaStore] = useState<MediaStore>(INITIAL_MEDIA);
   const [activeSection, setActiveSection] = useState('hero');
-  const [view, setView] = useState<'home' | 'projects'>('home');
+  const [view, setView] = useState<'home' | 'projects' | 'insights'>('home');
+  const [scrollBeforeInsights, setScrollBeforeInsights] = useState(0);
 
   // Owner auth
   const [isOwner, setIsOwner] = useState(() => isOwnerSession());
@@ -72,11 +73,25 @@ export default function App() {
 
   // Insights state
   const [insightsPid, setInsightsPid] = useState<number | null>(null);
-  const handleOpenInsights = (pid: number) => setInsightsPid(pid);
-  const handleCloseInsights = () => setInsightsPid(null);
+  
+  const handleOpenInsights = (pid: number) => {
+    setScrollBeforeInsights(window.scrollY);
+    setInsightsPid(pid);
+    setView('insights');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
+  const handleCloseInsights = () => {
+    setInsightsPid(null);
+    setView(scrollBeforeInsights > window.innerHeight ? 'projects' : 'home'); // generic fallback
+    setTimeout(() => {
+      window.scrollTo({ top: scrollBeforeInsights, behavior: 'instant' });
+    }, 50);
+  };
 
   // Scroll spy
   useEffect(() => {
+    if (view === 'insights') return; // Disable scroll spy on insights page
     const sections = document.querySelectorAll<HTMLElement>('section[id]');
     const onScroll = () => {
       const scrollY = window.scrollY + 100;
@@ -88,7 +103,7 @@ export default function App() {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [view]);
 
   // Scroll-reveal observer
   useEffect(() => {
@@ -179,7 +194,7 @@ export default function App() {
       <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); clearOwnerSession(); }} onOwnerLogin={() => setAuthOpen(true)} />
 
       <main className="animate-fade-in transition-all duration-700">
-        {view === 'home' ? (
+        {view === 'home' && (
           <>
             <Hero />
             <About />
@@ -196,7 +211,9 @@ export default function App() {
             <Certifications />
             <Contact />
           </>
-        ) : (
+        )}
+        
+        {view === 'projects' && (
           <div className="pt-20 min-h-screen animate-slide-up">
             <div className="max-w-[1200px] mx-auto px-12 pt-12">
               <button 
@@ -215,9 +232,28 @@ export default function App() {
             />
           </div>
         )}
+
+        {view === 'insights' && insightsPid !== null && (
+          <div className="pt-20 min-h-screen animate-slide-up pb-24">
+            <div className="max-w-[1300px] mx-auto px-6 md:px-12 pt-12">
+              <button 
+                onClick={handleCloseInsights}
+                className="group flex items-center gap-2 text-text-muted font-mono text-xs hover:text-accent transition-colors mb-8"
+              >
+                <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
+              </button>
+              
+              <ProjectInsights 
+                project={projects.find(p => p.id === insightsPid)!} 
+                media={mediaStore[insightsPid] ?? []}
+                onClose={handleCloseInsights} 
+              />
+            </div>
+          </div>
+        )}
       </main>
 
-      <Footer />
+      {view !== 'insights' && <Footer />}
 
       <Lightbox
         isOpen={lbOpen}
@@ -238,14 +274,6 @@ export default function App() {
         onDeleteFile={handleDeleteFile}
         onClickThumb={handleClickThumb}
       />
-
-      {insightsPid !== null && (
-        <ProjectInsights 
-          project={projects.find(p => p.id === insightsPid)!} 
-          media={mediaStore[insightsPid] ?? []}
-          onClose={handleCloseInsights} 
-        />
-      )}
 
       {authOpen && (
         <OwnerAuth

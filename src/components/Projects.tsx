@@ -436,11 +436,9 @@ export default function Projects({
           <div
             key={project.id}
             data-pid={project.id}
-            className={`project-card bg-surface border border-border rounded-2xl p-8 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden hover:border-accent/30 hover:-translate-y-1 hover:scale-[1.02] fade-up visible ${project.featured ? 'lg:col-span-2 bg-gradient-to-br from-surface to-accent2/5 border-accent2/30' : ''}`}
+            className={`project-card bg-surface border border-border rounded-2xl p-8 flex flex-col gap-4 transition-all duration-300 relative overflow-hidden hover:border-accent/30 hover:-translate-y-1 hover:scale-[1.02] fade-up visible`}
             style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <MediaPreview pid={project.id} mediaStore={mediaStore} onClick={() => onOpenLightbox(project.id)} />
-
             <div className="flex items-center gap-3">
               <div className={`w-11 h-11 rounded-[10px] flex items-center justify-center text-[20px] flex-shrink-0 ${project.iconClass}`}>
                 {project.icon}
