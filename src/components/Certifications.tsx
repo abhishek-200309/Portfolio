@@ -7,7 +7,7 @@ const certs = [
 export default function Certifications() {
   return (
     <section id="certifications" className="relative z-[1] py-20 px-12 max-w-[1200px] mx-auto">
-      <div className="section-label">Credentials</div>
+      <div className="section-label"></div>
       <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] leading-[1.1] tracking-[-0.01em] mb-8">
         Certifications
       </h2>
