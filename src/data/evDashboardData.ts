@@ -540,7 +540,7 @@ const CATEGORY_SEGMENTS = [
   { label: "Four Wheeler", tone: "accent", totalKey: "fourWheeler" }
 ] as const;
 
-const compactNumberFormatter = new Intl.NumberFormat("en-US", {
+const compactNumberFormatter = new Intl.NumberFormat("en-IN", {
   notation: "compact",
   maximumFractionDigits: 2,
 });
@@ -557,12 +557,12 @@ function buildMetrics(
 
   return [
     {
-      label: variant.key === "all" ? "Total EV Sales" : `Total ${variant.label} Sales`,
+      label: variant.key === "all" ? "Total EV Registrations" : `Total ${variant.label} Registrations`,
       value: formatCompactNumber(total),
       tone: variant.tone,
     },
     {
-      label: "Avg Annual Sales",
+      label: "Avg Annual Registrations",
       value: formatCompactNumber(total / EV_DASHBOARD_SUMMARY.years.length),
       tone: variant.tone,
     },
@@ -615,19 +615,14 @@ function buildDonutSegments(
 }
 
 function buildTrendFootnote(selectedState: string) {
-  if (selectedState === "All") {
-    return "National roll-up of 2015-2024 EV sales across all manufacturer states in the provided SQL dataset.";
-  }
-
-  return `2015-2024 EV sales tied to manufacturers based in ${selectedState}.`;
+  return "";
 }
 
 export const evProjectDashboard: ProjectDashboard = {
   badge: "EV",
   heading: "Market Adoption Insights",
   filtersLabel: "Vehicle",
-  helperText:
-    "State filtering uses manufacturer state from the provided EV SQL dataset, not buyer registration state.",
+  helperText: "",
   stateFilter: {
     label: "Manufacturer State",
     options: ["All", ...EV_DASHBOARD_SUMMARY.states],
@@ -652,7 +647,7 @@ export const evProjectDashboard: ProjectDashboard = {
       wideSections: [
         {
           kind: "line",
-          title: "EV Sales Trend (2015-2024)",
+          title: "EV Adoption Trend (2015-2024)",
           tone: variant.tone,
           xAxisLabel: "Years",
           points: buildLinePoints(summary.trends[variant.totalKey]),
@@ -669,7 +664,7 @@ export const evProjectDashboard: ProjectDashboard = {
         },
         {
           kind: "donut",
-          title: "EV Sales by Vehicle Category",
+          title: "EV Adoption by Vehicle Category",
           legendTitle: "vehicle_category",
           totalDisplayValue: formatCompactNumber(total),
           segments: buildDonutSegments(summary, variant),

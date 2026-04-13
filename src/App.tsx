@@ -235,7 +235,7 @@ export default function App() {
 
         {view === 'insights' && insightsPid !== null && (
           <div className="pt-20 min-h-screen animate-slide-up pb-24">
-            <div className="max-w-[1300px] mx-auto px-6 md:px-12 pt-12">
+            <div className="max-w-[1850px] mx-auto px-6 md:px-12 pt-12">
               <button 
                 onClick={handleCloseInsights}
                 className="group flex items-center gap-2 text-text-muted font-mono text-xs hover:text-accent transition-colors mb-8"

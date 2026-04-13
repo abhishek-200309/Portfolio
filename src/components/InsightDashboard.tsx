@@ -35,17 +35,22 @@ const tonePalette: Record<AccentTone, { hex: string; soft: string; dim: string }
   },
 };
 
-const CHART_WIDTH = 400;
-const CHART_HEIGHT = 120;
-const PLOT_LEFT = 20;
-const PLOT_RIGHT = 380;
-const PLOT_TOP = 10;
-const BASELINE_Y = 110;
+const CHART_WIDTH = 600;
+const CHART_HEIGHT = 280;
+const PLOT_LEFT = 10;
+const PLOT_RIGHT = 570;
+const PLOT_TOP = 40;
+const BASELINE_Y = 250;
 type ChartPoint = ProjectLinePoint & { x: number; y: number };
 
-const compactNumberFormatter = new Intl.NumberFormat('en-US', {
+const standardNumberFormatter = new Intl.NumberFormat('en-IN', {
+  maximumFractionDigits: 0,
+  useGrouping: true,
+});
+
+const compactNumberFormatter = new Intl.NumberFormat('en-IN', {
   notation: 'compact',
-  maximumFractionDigits: 2,
+  maximumFractionDigits: 1,
 });
 
 function getTone(tone: AccentTone = 'accent') {
@@ -53,7 +58,7 @@ function getTone(tone: AccentTone = 'accent') {
 }
 
 function formatCompactNumber(value: number) {
-  return compactNumberFormatter.format(value);
+  return standardNumberFormatter.format(value);
 }
 
 function buildAxisLabels(values: number[]) {
@@ -68,7 +73,7 @@ function buildAxisLabels(values: number[]) {
 
 function getChartPoints(points: ProjectLinePoint[]): ChartPoint[] {
   const maxValue = Math.max(...points.map((point) => point.value), 1);
-  const minValue = Math.min(...points.map((point) => point.value), 0);
+  const minValue = 0; // Force start from 0 per user requirement
   const range = Math.max(maxValue - minValue, 1);
   const step = points.length > 1 ? (PLOT_RIGHT - PLOT_LEFT) / (points.length - 1) : 0;
 
@@ -106,7 +111,7 @@ function MetricsGrid({ metrics }: { metrics: ProjectMetric[] }) {
     metrics.length >= 4 ? 'md:grid-cols-4' : metrics.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2';
 
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 ${columnClass}`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 mb-12 ${columnClass}`}>
       {metrics.map((metric) => {
         const tone = getTone(metric.tone ?? 'accent');
 
@@ -124,10 +129,10 @@ function MetricsGrid({ metrics }: { metrics: ProjectMetric[] }) {
                 {metric.icon}
               </span>
             )}
-            <div className="text-[11px] font-mono text-text-muted uppercase tracking-[0.08em] mb-2">
+            <div className="text-sm font-mono text-text-muted uppercase tracking-[0.1em] mb-2">
               {metric.label}
             </div>
-            <div className="font-mono text-[28px] leading-none" style={{ color: tone.hex }}>
+            <div className="font-mono text-4xl leading-none" style={{ color: tone.hex }}>
               {metric.value}
             </div>
           </div>
@@ -140,15 +145,15 @@ function MetricsGrid({ metrics }: { metrics: ProjectMetric[] }) {
 function BarsSection({ section }: { section: ProjectBarSection }) {
   return (
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl">
-      <h4 className="text-sm font-medium text-text mb-6">{section.title}</h4>
+      <h4 className="text-xl font-medium text-text mb-6">{section.title}</h4>
       <div className={section.compact ? 'space-y-4' : 'space-y-5'}>
         {section.items.map((item) => {
           const tone = getTone(item.tone ?? section.tone ?? 'accent');
           const label = item.labelSuffix ? `${item.label} (${item.labelSuffix})` : item.label;
 
           return (
-            <div key={`${section.title}-${item.label}`} className={section.compact ? 'group' : undefined}>
-              <div className="flex justify-between text-[11px] mb-1.5 px-1 gap-3">
+            <div key={item.label} className={section.compact ? 'group' : undefined}>
+              <div className="flex justify-between text-xs mb-1.5 px-1 gap-3">
                 <span className="font-medium text-text/80">{label}</span>
                 <span className="font-mono text-right" style={{ color: tone.hex }}>
                   {item.detail}
@@ -184,89 +189,91 @@ function LineSection({ section }: { section: ProjectLineSection }) {
   const yAxisLabels = section.yAxisLabels ?? buildAxisLabels(section.points.map((point) => point.value));
 
   return (
-    <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl flex flex-col min-h-[220px]">
-      <h4 className="text-sm font-medium text-text mb-6">{section.title}</h4>
-      <div className="flex-1 relative pl-10 pr-2 pb-9">
+    <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl flex flex-col h-full min-h-[380px]">
+      <h4 className="text-xl font-medium text-text mb-8">{section.title}</h4>
+      <div className="flex-1 relative pl-8 pr-2 pb-12">
         {yAxisLabels.length > 0 && (
-          <div className="absolute left-0 top-0 bottom-9 flex flex-col justify-between text-[10px] font-mono text-text-muted">
+          <div className="absolute left-0 top-0 bottom-12 flex flex-col justify-between text-xs font-mono text-text-muted/70">
             {yAxisLabels.map((label) => (
               <span key={`${section.title}-${label}`}>{label}</span>
             ))}
           </div>
         )}
 
-        <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="w-full h-32 overflow-visible">
+        <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="w-full h-auto overflow-visible">
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={tone.hex} stopOpacity="0.38" />
+              <stop offset="0%" stopColor={tone.hex} stopOpacity="0.45" />
               <stop offset="100%" stopColor={tone.hex} stopOpacity="0" />
             </linearGradient>
           </defs>
 
-          <path d={areaPath} fill={`url(#${gradientId})`} className="transition-all duration-1000 ease-in-out opacity-70" />
-          <line x1={PLOT_LEFT} y1={BASELINE_Y} x2={PLOT_RIGHT} y2={BASELINE_Y} stroke="rgba(255, 255, 255, 0.25)" strokeWidth="1" />
+          <path d={areaPath} fill={`url(#${gradientId})`} className="transition-all duration-1000 ease-in-out opacity-80" />
+          <line x1={PLOT_LEFT} y1={BASELINE_Y} x2={PLOT_RIGHT} y2={BASELINE_Y} stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1" />
+          
           <path
             d={linePath}
             fill="none"
             stroke={tone.hex}
-            strokeWidth="3"
+            strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ filter: `drop-shadow(0 0 8px ${tone.soft})` }}
+            style={{ filter: `drop-shadow(0 0 12px ${tone.soft})` }}
           />
 
           {chartPoints.map((point) => (
-            <g key={`${section.title}-${point.label}`} className="group/point">
+            <g key={point.label} className="group/point">
               <circle
                 cx={point.x}
                 cy={point.y}
-                r="4.5"
+                r="6"
                 fill={tone.hex}
                 stroke={tone.hex}
                 strokeWidth="2"
-                className="transition-all duration-300 group-hover/point:r-[6]"
+                className="transition-all duration-300 group-hover/point:r-8"
               />
               <text
                 x={point.x}
-                y={point.y - 12}
+                y={point.y - 18}
                 textAnchor="middle"
-                className="font-mono text-[9px] fill-white"
+                className="font-mono text-[16px] fill-white pointer-events-none"
+                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
               >
-                {point.displayValue}
+                {formatCompactNumber(point.value)}
               </text>
             </g>
           ))}
         </svg>
-
-        <div className="flex justify-between mt-3">
-          {section.points.map((point) => (
-            <span
-              key={`${section.title}-${point.label}-label`}
-              className="text-[10px] font-mono text-text/90 text-center min-w-[28px]"
-            >
-              {point.label}
-            </span>
-          ))}
-        </div>
-
-        {section.xAxisLabel && (
-          <div className="absolute bottom-0 left-10 right-2 text-center text-[10px] font-mono text-text-muted">
-            {section.xAxisLabel}
-          </div>
-        )}
       </div>
 
+      <div className="grid grid-cols-10 mt-4 px-2">
+        {section.points.map((point) => (
+          <span
+            key={`${section.title}-${point.label}-label`}
+            className="text-[11px] font-mono text-text-muted/90 text-center"
+          >
+            {point.label}
+          </span>
+        ))}
+      </div>
+
+      {section.xAxisLabel && (
+        <div className="mt-2 text-center text-[10px] font-bold font-mono text-text/40 uppercase tracking-[0.2em]">
+          {section.xAxisLabel}
+        </div>
+      )}
+
       {section.summary && section.summary.length > 0 && (
-        <div className="mt-8 flex items-center justify-between gap-4 px-2 pt-4 border-t border-border/20 flex-wrap">
+        <div className="mt-12 flex items-center justify-between gap-8 px-4 pt-6 border-t border-border/10 flex-wrap">
           {section.summary.map((item) => {
             const summaryTone = getTone(item.tone ?? section.tone ?? 'accent');
 
             return (
               <div key={`${section.title}-${item.label}`} className="flex flex-col">
-                <span className="text-[10px] font-mono text-text-muted uppercase tracking-wider">
+                <span className="text-[11px] font-mono text-text-muted uppercase tracking-wider">
                   {item.label}
                 </span>
-                <span className="text-lg font-mono" style={{ color: summaryTone.hex }}>
+                <span className="text-2xl font-mono mt-1" style={{ color: summaryTone.hex }}>
                   {item.value}
                 </span>
               </div>
@@ -275,7 +282,7 @@ function LineSection({ section }: { section: ProjectLineSection }) {
         </div>
       )}
 
-      {section.footnote && <p className="text-[10px] text-text-muted mt-6 italic text-center">{section.footnote}</p>}
+      {section.footnote && <p className="text-[11px] text-text-muted/60 mt-8 italic text-center max-w-4xl mx-auto">{section.footnote}</p>}
     </div>
   );
 }
@@ -285,11 +292,11 @@ function ColumnSection({ section }: { section: ProjectColumnSection }) {
   const yAxisLabels = section.yAxisLabels ?? buildAxisLabels(section.items.map((item) => item.value));
 
   return (
-    <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl">
-      <h4 className="text-sm font-medium text-text mb-6 text-center">{section.title}</h4>
-      <div className="relative pl-9 pr-2 pb-10 h-[210px]">
+    <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl h-full flex flex-col">
+      <h4 className="text-xl font-medium text-text mb-6 text-center">{section.title}</h4>
+      <div className="relative pl-8 pr-2 pb-16 flex-1 min-h-[250px] w-full">
         {yAxisLabels.length > 0 && (
-          <div className="absolute left-0 top-0 bottom-10 flex flex-col justify-between text-[10px] font-mono text-text-muted">
+          <div className="absolute left-0 top-0 bottom-16 flex flex-col justify-between text-xs font-mono text-text-muted">
             {yAxisLabels.map((label) => (
               <span key={`${section.title}-${label}`}>{label}</span>
             ))}
@@ -302,8 +309,8 @@ function ColumnSection({ section }: { section: ProjectColumnSection }) {
             const barHeight = `${Math.max((item.value / maxValue) * 100, 6)}%`;
 
             return (
-              <div key={`${section.title}-${item.label}`} className="flex-1 flex flex-col items-center justify-end h-full min-w-0">
-                <span className="text-[10px] font-mono text-white mb-2">{item.displayValue}</span>
+              <div key={item.label} className="flex-1 flex flex-col items-center justify-end h-full min-w-0">
+                <span className="text-xs font-mono text-white mb-2">{item.displayValue}</span>
                 <div
                   className="w-full max-w-[42px] rounded-t-md transition-all duration-700"
                   style={{
@@ -319,13 +326,13 @@ function ColumnSection({ section }: { section: ProjectColumnSection }) {
         <div className="mt-3 flex justify-between gap-3 px-3">
           {section.items.map((item) => (
             <div key={`${section.title}-${item.label}-label`} className="flex-1 min-w-0">
-              <div className="text-[10px] leading-[1.25] text-text text-center break-words">{item.label}</div>
+              <div className="text-xs leading-[1.25] text-text text-center break-words">{item.label}</div>
             </div>
           ))}
         </div>
 
         {section.xAxisLabel && (
-          <div className="absolute bottom-0 left-9 right-2 text-center text-[10px] font-mono text-text-muted">
+          <div className="absolute bottom-0 left-8 right-2 text-center text-[10px] font-mono text-text-muted">
             {section.xAxisLabel}
           </div>
         )}
@@ -336,76 +343,152 @@ function ColumnSection({ section }: { section: ProjectColumnSection }) {
 
 function DonutSection({ section }: { section: ProjectDonutSection }) {
   const total = Math.max(section.segments.reduce((sum, segment) => sum + segment.value, 0), 1);
-  const gradient = section.segments
-    .reduce<Array<{ color: string; start: number; end: number }>>((accumulator, segment) => {
-      const start = accumulator.length > 0 ? accumulator[accumulator.length - 1].end : 0;
-      const segmentPercent = (segment.value / total) * 100;
-      const tone = getTone(segment.tone ?? section.tone ?? 'accent');
-      accumulator.push({ color: tone.hex, start, end: start + segmentPercent });
-      return accumulator;
-    }, [])
-    .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`)
-    .join(', ');
+  
+  // SVG parameters
+  const size = 560; // Increased to contain wider labels
+  const center = size / 2;
+  const radius = 90;
+  const strokeWidth = 35;
+  const circumference = 2 * Math.PI * radius;
+
+  let currentPercent = 0;
 
   return (
-    <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl">
-      <h4 className="text-sm font-medium text-text mb-6 text-center">{section.title}</h4>
-      <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] items-center gap-6">
-        <div className="flex items-center justify-center">
-          <div
-            className="w-[128px] h-[128px] rounded-full relative"
-            style={{ background: `conic-gradient(${gradient || `${getTone(section.tone ?? 'accent').hex} 0% 100%`})` }}
-          >
-            <div className="absolute inset-[26px] rounded-full bg-surface" />
-          </div>
-        </div>
+    <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl h-full flex flex-col">
+      <h4 className="text-xl font-medium text-text mb-4 text-center">{section.title}</h4>
+      
+      <div className="flex-1 flex items-center justify-center min-h-[340px]">
+        <div className="w-full max-w-[400px] aspect-square relative mx-auto flex items-center justify-center">
+          <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full block overflow-hidden">
+            <defs>
+              {section.segments.map((segment, idx) => {
+                const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
+                return (
+                  <linearGradient key={`grad-${idx}`} id={`grad-${idx}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={segmentTone.hex} />
+                    <stop offset="100%" stopColor={segmentTone.hex} stopOpacity="0.8" />
+                  </linearGradient>
+                );
+              })}
+            </defs>
 
-        <div className="space-y-3">
-          {section.legendTitle && (
-            <div className="text-[11px] font-mono text-text-muted tracking-[0.08em] uppercase">
-              {section.legendTitle}
-            </div>
-          )}
-          {section.segments.map((segment) => {
-            const tone = getTone(segment.tone ?? section.tone ?? 'accent');
-            const percent = ((segment.value / total) * 100).toFixed(2);
+            {section.segments.map((segment, idx) => {
+              const segmentPercent = (segment.value / total) * 100;
+              const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
+              
+              const dashOffset = circumference - (segmentPercent / 100) * circumference;
+              const rotation = (currentPercent / 100) * 360 - 90;
+              
+              // Callout position - moved further out for "normal" spacing
+              const midAngle = currentPercent + segmentPercent / 2;
+              const midRad = ((midAngle * 3.6 - 90) * Math.PI) / 180;
+              
+              const calloutRadius = radius + 55;
+              const isRightSide = Math.cos(midRad) > 0.1;
+              const isLeftSide = Math.cos(midRad) < -0.1;
+              
+              const labelX = center + (calloutRadius + 20) * Math.cos(midRad);
+              const labelY = center + (calloutRadius + 20) * Math.sin(midRad);
+              const lineEndX = center + calloutRadius * Math.cos(midRad);
+              const lineEndY = center + calloutRadius * Math.sin(midRad);
+              const arcPointOff = 10; 
+              const arcPointX = center + (radius + arcPointOff) * Math.cos(midRad);
+              const arcPointY = center + (radius + arcPointOff) * Math.sin(midRad);
 
-            return (
-              <div key={`${section.title}-${segment.label}`} className="flex items-center justify-between gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: tone.hex }} />
-                  <span className="text-text">{segment.label}</span>
-                </div>
-                <span className="font-mono text-text-muted">
-                  {segment.displayValue} ({percent}%)
-                </span>
-              </div>
-            );
-          })}
+              const segmentNode = (
+                <g key={segment.label} className="group/segment">
+                  <circle
+                    cx={center}
+                    cy={center}
+                    r={radius}
+                    fill="none"
+                    stroke={`url(#grad-${idx})`}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={circumference}
+                    strokeDashoffset={dashOffset}
+                    strokeLinecap="round"
+                    transform={`rotate(${rotation} ${center} ${center})`}
+                    className="transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] hover:opacity-90 cursor-pointer"
+                  />
+                  
+                  {segmentPercent > 2 && (
+                    <g className="transition-opacity duration-500">
+                      <line
+                        x1={arcPointX}
+                        y1={arcPointY}
+                        x2={lineEndX}
+                        y2={lineEndY}
+                        stroke="rgba(255,255,255,0.2)"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={labelX}
+                        y={labelY}
+                        textAnchor={isRightSide ? "start" : isLeftSide ? "end" : "middle"}
+                        dominantBaseline="middle"
+                        className="fill-white font-mono text-[14px]"
+                      >
+                        <tspan x={labelX} dy="-0.6em" className="font-bold">
+                          {formatCompactNumber(segment.value)}
+                        </tspan>
+                        <tspan x={labelX} dy="1.2em" className="fill-text-muted font-normal text-[11px]">
+                          {segmentPercent.toFixed(1)}%
+                        </tspan>
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+
+              currentPercent += segmentPercent;
+              return segmentNode;
+            })}
+            
+            <text x={center} y={center} textAnchor="middle" dominantBaseline="middle" className="pointer-events-none">
+              <tspan x={center} dy="-0.4em" className="text-xs font-mono fill-text-muted uppercase tracking-[0.2em]">Total</tspan>
+              <tspan x={center} dy="1.4em" className="text-xl font-mono fill-white font-bold">{formatCompactNumber(total)}</tspan>
+            </text>
+          </svg>
         </div>
       </div>
 
-      {section.totalDisplayValue && (
-        <div className="mt-6 text-center text-[11px] font-mono text-text-muted">
-          Total tracked volume: <span className="text-text">{section.totalDisplayValue}</span>
-        </div>
-      )}
-
+      <div className="w-full mt-auto space-y-2 border-t border-border/20 pt-6">
+        {section.legendTitle && (
+          <div className="text-xs font-mono text-text-muted tracking-[0.1em] uppercase text-center mb-4">
+            {section.legendTitle}
+          </div>
+        )}
+        {section.segments.map((segment) => {
+          const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
+          return (
+            <div key={`${section.title}-${segment.label}`} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: segmentTone.hex }} />
+                <span className="text-text text-xs">{segment.label}</span>
+              </div>
+              <span className="font-mono text-text-muted text-[11px]">
+                {formatCompactNumber(segment.value)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
       {section.footnote && <p className="text-[10px] text-text-muted mt-6 italic text-center">{section.footnote}</p>}
     </div>
   );
 }
 
-function renderSection(section: ProjectDashboardSection, index: number) {
+function renderSection(section: ProjectDashboardSection) {
+  const key = section.kind + section.title;
   switch (section.kind) {
     case 'bars':
-      return <BarsSection key={`${section.title}-${index}`} section={section} />;
+      return <BarsSection key={key} section={section} />;
     case 'line':
-      return <LineSection key={`${section.title}-${index}`} section={section} />;
+      return <LineSection key={key} section={section} />;
     case 'columns':
-      return <ColumnSection key={`${section.title}-${index}`} section={section} />;
+      return <ColumnSection key={key} section={section} />;
     case 'donut':
-      return <DonutSection key={`${section.title}-${index}`} section={section} />;
+      return <DonutSection key={key} section={section} />;
     default:
       return null;
   }
@@ -427,25 +510,13 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
       activeVariantKey,
       fallbackContent,
     }) ?? fallbackContent;
-  const wideFirst = content.layout === 'wide-first';
   const scopeLabel = selectedState === 'All' ? 'All states' : selectedState;
-
-  const wideSectionMarkup =
-    content.wideSections && content.wideSections.length > 0 ? (
-      <div className="space-y-8">{content.wideSections.map(renderSection)}</div>
-    ) : null;
-
-  const gridSectionMarkup =
-    content.gridSections && content.gridSections.length > 0 ? (
-      <div className={`grid grid-cols-1 gap-8 ${content.gridSections.length > 1 ? 'md:grid-cols-2' : ''}`}>
-        {content.gridSections.map(renderSection)}
-      </div>
-    ) : null;
+  const allSections = [...(content.wideSections ?? []), ...(content.gridSections ?? [])];
 
   return (
-    <section className="space-y-8 animate-fade-in">
-      <div className="space-y-3">
-        <h3 className="text-xl font-medium text-text border-b border-border/50 pb-3 flex items-center gap-3">
+    <section className="space-y-12 md:space-y-16 animate-fade-in">
+      <div className="space-y-4">
+        <h3 className="text-2xl md:text-3xl font-medium text-text border-b border-border/50 pb-4 flex items-center gap-3">
           <span className="font-mono text-xs text-accent tracking-[0.18em] uppercase">{dashboard.badge}</span>
           <span>{dashboard.heading}</span>
         </h3>
@@ -456,47 +527,51 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
             <span>{scopeLabel}</span>
           </div>
         )}
+      </div>
 
-        {(variants.length > 0 || stateFilter) && (
-          <div className="space-y-4">
-            {dashboard.filtersLabel && (
-              <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase">
-                {dashboard.filtersLabel}
-              </div>
-            )}
+      {(variants.length > 0 || stateFilter) && (
+        <div className="sticky top-24 z-40 bg-bg/90 backdrop-blur-xl py-5 px-6 rounded-2xl border border-border/60 shadow-lg transition-all">
+          <div className="flex flex-col md:flex-row md:items-start gap-8">
             {variants.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {variants.map((variant) => {
-                  const isActive = variant.key === activeVariantKey;
+              <div className="space-y-3 flex-1">
+                {dashboard.filtersLabel && (
+                  <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase">
+                    {dashboard.filtersLabel}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2.5">
+                  {variants.map((variant) => {
+                    const isActive = variant.key === activeVariantKey;
 
-                  return (
-                    <button
-                      key={variant.key}
-                      type="button"
-                      onClick={() => setActiveVariantKey(variant.key)}
-                      className={`px-4 py-2 rounded-full border font-mono text-[11px] tracking-[0.06em] transition-all duration-200 ${
-                        isActive
-                          ? 'border-accent bg-accent text-bg'
-                          : 'border-border text-text-muted bg-surface hover:border-accent/40 hover:text-text'
-                      }`}
-                    >
-                      {variant.label}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={variant.key}
+                        type="button"
+                        onClick={() => setActiveVariantKey(variant.key)}
+                        className={`px-5 py-2.5 rounded-full border font-mono text-[11px] tracking-[0.06em] transition-all duration-200 ${
+                          isActive
+                            ? 'border-accent bg-accent text-bg shadow-md shadow-accent/20'
+                            : 'border-border text-text-muted bg-surface/50 hover:border-accent/40 hover:text-text'
+                        }`}
+                      >
+                        {variant.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
             {stateFilter && (
-              <div className="max-w-[260px] space-y-2">
-                <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase">
-                  {stateFilter.label}
+              <div className="max-w-[280px] w-full space-y-3 shrink-0">
+                <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase flex justify-between items-center">
+                  <span>{stateFilter.label}</span>
                 </div>
-                <div className="relative">
+                <div className="relative group">
                   <select
                     value={selectedState}
                     onChange={(event) => setSelectedState(event.target.value)}
-                    className="w-full appearance-none rounded-xl border border-border bg-surface px-4 py-3 pr-10 text-sm text-text outline-none transition-colors hover:border-accent/40 focus:border-accent"
+                    className="w-full appearance-none rounded-xl border border-border bg-surface/80 px-4 py-3 pr-10 text-sm text-text outline-none transition-colors group-hover:border-accent/40 focus:border-accent cursor-pointer shadow-sm"
                   >
                     {stateFilter.options.map((option) => (
                       <option key={option} value={option}>
@@ -504,35 +579,36 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
                       </option>
                     ))}
                   </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted">
+                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-accent transition-colors">
                     ▾
                   </span>
                 </div>
               </div>
             )}
+          </div>
 
-            {dashboard.helperText && (
-              <p className="max-w-2xl text-[11px] leading-relaxed text-text-muted">
+          {dashboard.helperText && (
+            <div className="mt-5 pt-4 border-t border-border/40">
+              <p className="max-w-3xl text-[11px] leading-relaxed text-text-muted/80">
                 {dashboard.helperText}
               </p>
-            )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {content.metrics && content.metrics.length > 0 && <MetricsGrid metrics={content.metrics} />}
 
-      {wideFirst ? (
-        <>
-          {wideSectionMarkup}
-          {gridSectionMarkup}
-        </>
-      ) : (
-        <>
-          {gridSectionMarkup}
-          {wideSectionMarkup}
-        </>
-      )}
+      <div className={`grid grid-cols-1 gap-4 lg:gap-6 ${
+        allSections.length >= 3 ? 'lg:grid-cols-3' : 
+        allSections.length === 2 ? 'md:grid-cols-2' : ''
+      }`}>
+        {allSections.map((section) => (
+          <div key={section.kind + section.title} className="h-full">
+            {renderSection(section)}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

@@ -12,21 +12,11 @@ interface Props {
 export default function ProjectInsights({ project, media = [], onClose }: Props) {
   const [enlargedItem, setEnlargedItem] = useState<MediaItem | null>(null);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
   if (!project.insights) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-12 animate-fade-in">
-      <div className="absolute inset-0 bg-bg/80 backdrop-blur-md cursor-pointer" onClick={onClose} />
-
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-surface border border-border rounded-2xl md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up select-text">
-        <div className="flex-shrink-0 border-b border-border p-6 md:px-10 md:py-8 flex items-start justify-between gap-4 bg-surface2/50 backdrop-blur-sm z-10 sticky top-0">
+    <div className="w-full mx-auto animate-slide-up select-text mb-32 flex flex-col gap-16 md:gap-24 pt-8">
+      <div className="flex items-start justify-between gap-4 shrink-0 pb-8 border-b border-border/40">
           <div>
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${project.iconClass}`}>
@@ -48,8 +38,8 @@ export default function ProjectInsights({ project, media = [], onClose }: Props)
             </svg>
           </button>
         </div>
-
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-12 custom-scrollbar">
+        
+        <div className="flex flex-col space-y-24 md:space-y-32">
           <section>
             <h3 className="text-xl font-medium text-text mb-4 border-b border-border/50 pb-3 flex items-center gap-3">
               <span className="text-xl opacity-80">Overview</span>
@@ -149,7 +139,6 @@ export default function ProjectInsights({ project, media = [], onClose }: Props)
             </div>
           </section>
         </div>
-      </div>
     </div>
   );
 }
