@@ -240,9 +240,9 @@ export default function App() {
             <div className="max-w-[1200px] mx-auto px-12 pt-12">
               <button 
                 onClick={() => handleNavigate('hero')}
-                className="group flex items-center gap-2 text-text-muted font-mono text-xs hover:text-accent transition-colors mb-4"
+                className="group flex items-center gap-2 text-text-muted font-mono text-s hover:text-accent transition-colors mb-4"
               >
-                <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Home
+                <span className="group-hover:-translate-x-1 transition-transform text-xl">←</span> Back to Home
               </button>
             </div>
             <Projects
@@ -260,9 +260,9 @@ export default function App() {
             <div className="max-w-[1850px] mx-auto px-6 md:px-12 pt-12">
               <button 
                 onClick={handleCloseInsights}
-                className="group flex items-center gap-2 text-text-muted font-mono text-xs hover:text-accent transition-colors mb-8"
+                className="group flex items-center gap-2 text-text-muted font-mono text-s hover:text-accent transition-colors mb-8"
               >
-                <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
+                <span className="group-hover:-translate-x-1 transition-transform text-xl ">←</span> Back
               </button>
               
               <ProjectInsights 

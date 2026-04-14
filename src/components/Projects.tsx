@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useRef, useState } from 'react';
-import type { MediaStore } from '../types';
-import { evProjectDashboard } from '../data/evDashboardData';
+import { useRef, useState } from "react";
+import type { MediaStore } from "../types";
+import { evProjectDashboard } from "../data/evDashboardData";
 
 interface ProjectsProps {
   mediaStore: MediaStore;
@@ -13,7 +13,7 @@ interface ProjectsProps {
   onViewAll?: () => void;
 }
 
-export type AccentTone = 'accent' | 'accent2' | 'accent3' | 'accent4';
+export type AccentTone = "accent" | "accent2" | "accent3" | "accent4";
 
 export interface ProjectLink {
   label: string;
@@ -58,7 +58,7 @@ interface DashboardContent {
   metrics?: ProjectMetric[];
   gridSections?: ProjectDashboardSection[];
   wideSections?: ProjectDashboardSection[];
-  layout?: 'grid-first' | 'wide-first';
+  layout?: "grid-first" | "wide-first";
 }
 
 export type ProjectDashboardContent = DashboardContent;
@@ -70,13 +70,13 @@ export interface ProjectDashboardResolverContext {
 }
 
 export interface ProjectBarSection extends ProjectDashboardSectionBase {
-  kind: 'bars';
+  kind: "bars";
   items: ProjectBarDatum[];
   compact?: boolean;
 }
 
 export interface ProjectLineSection extends ProjectDashboardSectionBase {
-  kind: 'line';
+  kind: "line";
   points: ProjectLinePoint[];
   summary?: ProjectLineSummary[];
   xAxisLabel?: string;
@@ -91,7 +91,7 @@ export interface ProjectColumnDatum {
 }
 
 export interface ProjectColumnSection extends ProjectDashboardSectionBase {
-  kind: 'columns';
+  kind: "columns";
   items: ProjectColumnDatum[];
   xAxisLabel?: string;
   yAxisLabels?: string[];
@@ -106,7 +106,7 @@ export interface ProjectDonutDatum {
 }
 
 export interface ProjectDonutSection extends ProjectDashboardSectionBase {
-  kind: 'donut';
+  kind: "donut";
   segments: ProjectDonutDatum[];
   legendTitle?: string;
   totalLabel?: string;
@@ -135,7 +135,9 @@ export interface ProjectDashboard extends DashboardContent {
     options: string[];
     defaultValue?: string;
   };
-  resolveContent?: (context: ProjectDashboardResolverContext) => ProjectDashboardContent;
+  resolveContent?: (
+    context: ProjectDashboardResolverContext,
+  ) => ProjectDashboardContent;
 }
 
 export interface ProjectInsightsContent {
@@ -163,26 +165,25 @@ const projects: Project[] = [
   {
     id: 0,
     featured: true,
-    icon: '⚡',
-    iconClass: 'bg-accent2/10',
-    tag: 'Data Analytics Project',
-    name: 'The Rise of Electric Vehicles in India',
-    desc: 'Built an end-to-end Power BI dashboard to analyze the EV transition in India (2015-2024). Focused on adoption patterns, category shifts, and manufacturer leadership.',
-    stack: ['Power BI', 'SQL', 'Excel', 'DAX'],
-    links: [
-      { label: '→ Live Dashboard', href: '#' },
-      { label: 'GitHub', href: '#', ghost: true },
-    ],
+    icon: "⚡",
+    iconClass: "bg-accent2/10",
+    tag: "Data Analytics Project",
+    name: "The Rise of Electric Vehicles in India",
+    desc: "Built an end-to-end Power BI dashboard to analyze the EV transition in India (2015-2024). Focused on adoption patterns, category shifts, and manufacturer leadership.",
+    stack: ["Power BI", "SQL", "Excel", "DAX"],
+    links: [],
     insights: {
-      overview: 'A comprehensive analysis of the electric vehicle market in India, aiming to uncover growth trends, state-wise adoption rates, and the shift in consumer preferences between 2015 and 2024.',
+      overview:
+        "A comprehensive analysis of the electric vehicle market in India, aiming to uncover growth trends, state-wise adoption rates, and the shift in consumer preferences between 2015 and 2024.",
       technologies: [
-        'Power BI for dynamic data visualization and dashboarding',
-        'SQL for data extraction and cleaning',
-        'Excel for initial data exploration',
-        'DAX for complex calculated measures',
+        "Power BI for dynamic data visualization and dashboarding",
+        "SQL for data extraction and cleaning",
+        "Excel for initial data exploration",
+        "DAX for complex calculated measures",
       ],
-      challenges: 'Handling missing geographic data across various states required mapping custom regions. Optimizing DAX queries for a large dataset (over 1M rows) to ensure the dashboard remained responsive was a significant hurdle. Furthermore, aligning public data sources with differing formats demanded rigorous ETL processes.',
-outcomes: `
+      challenges:
+        "Handling missing geographic data across various states required mapping custom regions. Optimizing DAX queries for a large dataset (over 1M rows) to ensure the dashboard remained responsive was a significant hurdle. Furthermore, aligning public data sources with differing formats demanded rigorous ETL processes.",
+      outcomes: `
 • EV adoption remained minimal until 2019, followed by a sharp acceleration post-2021, indicating a strong policy and infrastructure push.
 
 • 2023 marks the peak adoption year, while 2024 shows a controlled slowdown rather than decline.
@@ -197,140 +198,127 @@ outcomes: `
   {
     id: 1,
     featured: false,
-    icon: '🏥',
-    iconClass: 'bg-accent/10',
-    tag: 'SQL Analytics',
-    name: 'Hospital Management Analytics',
-    desc: 'Designed a relational database for hospital operations. Conducted extensive demographics, appointment, and revenue analysis using SQL Window Functions and Joins.',
-    stack: ['MySQL', 'Database Design', 'Data Analytics'],
+    icon: "🏥",
+    iconClass: "bg-accent/10",
+    tag: "SQL Analytics",
+    name: "Hospital Management Analytics",
+    desc: "Designed a relational database for hospital operations. Conducted extensive demographics, appointment, and revenue analysis using SQL Window Functions and Joins.",
+    stack: ["MySQL", "Database Design", "Data Analytics"],
     links: [
-      { label: '→ View Queries', href: 'https://github.com/abhishek-200309/Hospital-Management/blob/master/project_analysis.sql' },
-      { label: 'GitHub', href: 'https://github.com/abhishek-200309/Hospital-Management', ghost: true },
+      {
+        label: "→ View Queries",
+        href: "https://github.com/abhishek-200309/Hospital-Management/blob/master/project_analysis.sql",
+      },
+      {
+        label: "GitHub",
+        href: "https://github.com/abhishek-200309/Hospital-Management",
+        ghost: true,
+      },
     ],
     insights: {
-      overview: 'Architected a comprehensive relational database system to streamline hospital administration. The project focused on transforming raw operational data into actionable clinical and financial insights based on a 200-patient dataset.',
+      overview:
+        "Architected a comprehensive relational database system to streamline hospital administration. The project focused on transforming raw operational data into actionable clinical and financial insights based on a 200-patient dataset.",
       technologies: [
-        'MySQL for relational modeling and data storage',
-        'Complex Joins & CTEs for multi-table reporting',
-        'Window Functions for ranking doctor performance and revenue tracking',
-        'ER Diagramming for database normalization (3NF)',
+        "MySQL for relational modeling and data storage",
+        "Complex Joins & CTEs for multi-table reporting",
+        "Window Functions for ranking doctor performance and revenue tracking",
+        "ER Diagramming for database normalization (3NF)",
       ],
-      challenges: 'A key challenge was calculating "Patient Stay Duration" accurately while handling null discharge dates for currently admitted patients (20% of cases). This was solved using COALESCE with CURDATE(). Additionally, I implemented a robust billing logic that joins the Admission, Treatment, and Medical Test tables to compute accurate totals per patient stay.',
-      outcomes: 'Achieved a perfectly balanced 1:1 gender ratio across 200 patients. Successfully tracked 320 appointments and 140 admissions across 20 specialized departments. The analysis identified Jan-May 2025 as the busiest period, with a total hospital revenue of $2.32M and a 60% billing collection rate.',
+      challenges:
+        'A key challenge was calculating "Patient Stay Duration" accurately while handling null discharge dates for currently admitted patients (20% of cases). This was solved using COALESCE with CURDATE(). Additionally, I implemented a robust billing logic that joins the Admission, Treatment, and Medical Test tables to compute accurate totals per patient stay.',
+      outcomes:
+        "Achieved a perfectly balanced 1:1 gender ratio across 200 patients. Successfully tracked 320 appointments and 140 admissions across 20 specialized departments. The analysis identified Jan-May 2025 as the busiest period, with a total hospital revenue of $2.32M and a 60% billing collection rate.",
       dashboard: {
-        badge: 'SQL',
-        heading: 'Core Project Analytics',
+        badge: "SQL",
+        heading: "Core Project Analytics",
         gridSections: [
           {
-            kind: 'bars',
-            title: 'Patient Gender Composition',
+            kind: "bars",
+            title: "Patient Gender Composition",
             items: [
-              { label: 'MALE', labelSuffix: '50%', detail: '100 pts', barPercent: 50, tone: 'accent' },
-              { label: 'FEMALE', labelSuffix: '50%', detail: '100 pts', barPercent: 50, tone: 'accent3' },
+              {
+                label: "MALE",
+                labelSuffix: "50%",
+                detail: "100 pts",
+                barPercent: 50,
+                tone: "accent",
+              },
+              {
+                label: "FEMALE",
+                labelSuffix: "50%",
+                detail: "100 pts",
+                barPercent: 50,
+                tone: "accent3",
+              },
             ],
-            footnote: 'Derived from 200 patient registration records across the defined modulo logic.',
+            footnote:
+              "Derived from 200 patient registration records across the defined modulo logic.",
           },
           {
-            kind: 'line',
-            title: 'Monthly Admission Pipeline',
-            tone: 'accent',
+            kind: "line",
+            title: "Monthly Admission Pipeline",
+            tone: "accent",
             points: [
-              { label: 'JAN', value: 31, displayValue: '31' },
-              { label: 'FEB', value: 28, displayValue: '28' },
-              { label: 'MAR', value: 31, displayValue: '31' },
-              { label: 'APR', value: 30, displayValue: '30' },
-              { label: 'MAY', value: 20, displayValue: '20' },
+              { label: "JAN", value: 31, displayValue: "31" },
+              { label: "FEB", value: 28, displayValue: "28" },
+              { label: "MAR", value: 31, displayValue: "31" },
+              { label: "APR", value: 30, displayValue: "30" },
+              { label: "MAY", value: 20, displayValue: "20" },
             ],
-            footnote: 'Trend analysis of 140 admissions (Q1-Q2 2025).',
+            footnote: "Trend analysis of 140 admissions (Q1-Q2 2025).",
           },
         ],
         wideSections: [
           {
-            kind: 'bars',
-            title: 'Top 5 Departments (Utilization)',
+            kind: "bars",
+            title: "Top 5 Departments (Utilization)",
             compact: true,
-            tone: 'accent',
+            tone: "accent",
             items: [
-              { label: 'Cardiology', detail: '7 admissions', barPercent: 90 },
-              { label: 'Neurology', detail: '7 admissions', barPercent: 90 },
-              { label: 'Orthopedics', detail: '7 admissions', barPercent: 90 },
-              { label: 'Pediatrics', detail: '7 admissions', barPercent: 90 },
-              { label: 'Oncology', detail: '7 admissions', barPercent: 90 },
+              { label: "Cardiology", detail: "7 admissions", barPercent: 90 },
+              { label: "Neurology", detail: "7 admissions", barPercent: 90 },
+              { label: "Orthopedics", detail: "7 admissions", barPercent: 90 },
+              { label: "Pediatrics", detail: "7 admissions", barPercent: 90 },
+              { label: "Oncology", detail: "7 admissions", barPercent: 90 },
             ],
-            footnote: 'Verification note: each of the 20 departments (Building A-T) reached peak consistency with 7 admissions each.',
+            footnote:
+              "Verification note: each of the 20 departments (Building A-T) reached peak consistency with 7 admissions each.",
           },
           {
-            kind: 'line',
-            title: 'Monthly Revenue Trends (2025)',
-            tone: 'accent2',
+            kind: "line",
+            title: "Monthly Revenue Trends (2025)",
+            tone: "accent2",
             points: [
-              { label: 'JAN', value: 513, displayValue: '$513K' },
-              { label: 'FEB', value: 464, displayValue: '$464K' },
-              { label: 'MAR', value: 513, displayValue: '$513K' },
-              { label: 'APR', value: 497, displayValue: '$497K' },
-              { label: 'MAY', value: 331, displayValue: '$331K' },
+              { label: "JAN", value: 513, displayValue: "$513K" },
+              { label: "FEB", value: 464, displayValue: "$464K" },
+              { label: "MAR", value: 513, displayValue: "$513K" },
+              { label: "APR", value: 497, displayValue: "$497K" },
+              { label: "MAY", value: 331, displayValue: "$331K" },
             ],
             summary: [
-              { label: 'Total Revenue', value: '$2,320,000', tone: 'accent2' },
-              { label: 'Collection Rate', value: '60.0%', tone: 'accent' },
+              { label: "Total Revenue", value: "$2,320,000", tone: "accent2" },
+              { label: "Collection Rate", value: "60.0%", tone: "accent" },
             ],
-            footnote: 'Financial performance data aggregated across 140 admissions and outpatient billing.',
+            footnote:
+              "Financial performance data aggregated across 140 admissions and outpatient billing.",
           },
         ],
       },
     },
   },
-  {
-    id: 2,
-    featured: false,
-    icon: '🚗',
-    iconClass: 'bg-accent3/10',
-    tag: 'Python / EDA',
-    name: 'Ride-Share Price Prediction',
-    desc: 'Performed EDA on 500K+ rows of ride-share data. Built a regression model to predict surge pricing with 87% accuracy using scikit-learn.',
-    stack: ['Pandas', 'Scikit-learn', 'Seaborn'],
-    links: [
-      { label: '→ Notebook', href: '#' },
-      { label: 'GitHub', href: '#', ghost: true },
-    ],
-    insights: {
-      overview: 'An end-to-end machine learning project focusing on exploring factors that influence ride-share pricing such as distance, time of day, and weather conditions, culminating in a predictive model.',
-      technologies: [
-        'Python (Pandas, NumPy) for data manipulation',
-        'Scikit-learn for model training and evaluation',
-        'Seaborn & Matplotlib for exploratory data analysis',
-      ],
-      challenges: 'The dataset contained overwhelming categorical variables like weather conditions and pick-up locations which required extensive feature engineering and One-Hot Encoding. Handling outliers in surge pricing during extreme weather scenarios also required robust data imputation and statistical filtering.',
-      outcomes: 'Trained a Random Forest Regression model that predicted surge prices with an 87% accuracy (R-squared score), identifying weather severity as the top predictive feature next to distance.',
-    },
-  },
-  {
-    id: 3,
-    featured: false,
-    icon: '📱',
-    iconClass: 'bg-yellow-400/10',
-    tag: 'Marketing Analytics',
-    name: 'Social Media ROI Tracker',
-    desc: 'Built a Google Sheets + App Script dashboard to track campaign performance across 4 social platforms. Automated weekly PDF reports for stakeholders.',
-    stack: ['Google Sheets', 'App Script', 'Looker Studio'],
-    links: [
-      { label: '→ View Dashboard', href: '#' },
-      { label: 'GitHub', href: '#', ghost: true },
-    ],
-    insights: {
-      overview: 'A fully automated marketing analytics pipeline designed to consolidate data from multiple social media APIs into a single Google Sheets source, visualized through Looker Studio.',
-      technologies: [
-        'Google Sheets & App Script for backend automation',
-        'Looker Studio for interactive reporting',
-        'REST APIs for data ingestion',
-      ],
-      challenges: 'Dealing with rate limits and differing API structures across 4 platforms (Meta, Twitter, LinkedIn, TikTok) required writing complex, error-resilient App Scripts. Designing a unified schema to equate "engagements" from different platforms was a conceptual hurdle.',
-      outcomes: 'Reduced reporting time from 5 hours a week down to zero. The automated PDF reports provided stakeholders with real-time visibility into ad spend efficiency and return on investment.',
-    },
-  },
+  
+
 ];
 
-function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: MediaStore; onClick: () => void }) {
+function MediaPreview({
+  pid,
+  mediaStore,
+  onClick,
+}: {
+  pid: number;
+  mediaStore: MediaStore;
+  onClick: () => void;
+}) {
   const items = mediaStore[pid] ?? [];
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -353,23 +341,25 @@ function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: M
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`w-full aspect-video rounded-xl overflow-hidden bg-surface2 border border-border relative flex-shrink-0 group flex items-center justify-center ${items.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
+      className={`w-full aspect-video rounded-xl overflow-hidden bg-surface2 border border-border relative flex-shrink-0 group flex items-center justify-center ${items.length > 0 ? "cursor-pointer" : "cursor-default"}`}
     >
       {items.length === 0 ? (
         <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-text-dim">
           <div className="text-[32px] opacity-30">🖼</div>
-          <span className="font-mono text-[10px] tracking-[0.06em]">No media yet</span>
+          <span className="font-mono text-[10px] tracking-[0.06em]">
+            No media yet
+          </span>
         </div>
       ) : (
         <>
-          {items[0].type === 'video' ? (
+          {items[0].type === "video" ? (
             <>
               {items[0].poster && !isPlaying && (
                 <img
                   src={items[0].poster}
                   alt="thumbnail"
                   onError={(event) => {
-                    event.currentTarget.style.display = 'none';
+                    event.currentTarget.style.display = "none";
                   }}
                   className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover:scale-[1.04] z-10"
                 />
@@ -416,12 +406,15 @@ export default function Projects({
   const displayedProjects = limit ? projects.slice(0, limit) : projects;
 
   return (
-    <section id="projects" className="relative z-[1] py-24 px-12 max-w-[1200px] mx-auto transition-all duration-500">
+    <section
+      id="projects"
+      className="relative z-[1] py-24 px-12 max-w-[1200px] mx-auto transition-all duration-500"
+    >
       <div className="flex justify-between items-end mb-0">
         <div>
           <div className="section-label">Selected work</div>
           <h2 className="font-serif text-[clamp(18px,3.5vw,48px)] leading-[1.1] tracking-[-0.01em] mb-0">
-            {limit ? 'Featured Projects' : 'All Projects'}
+            {limit ? "Featured Projects" : "All Projects"}
           </h2>
         </div>
         {isOwner ? (
@@ -450,15 +443,23 @@ export default function Projects({
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <div className="flex items-center gap-3">
-              <div className={`w-11 h-11 rounded-[10px] flex items-center justify-center text-[20px] flex-shrink-0 ${project.iconClass}`}>
+              <div
+                className={`w-11 h-11 rounded-[10px] flex items-center justify-center text-[20px] flex-shrink-0 ${project.iconClass}`}
+              >
                 {project.icon}
               </div>
-              <span className="font-mono text-[10px] text-text-dim tracking-[0.08em] uppercase">{project.tag}</span>
+              <span className="font-mono text-[10px] text-text-dim tracking-[0.08em] uppercase">
+                {project.tag}
+              </span>
             </div>
 
-            <div className="font-serif text-[22px] text-text leading-[1.2]">{project.name}</div>
+            <div className="font-serif text-[22px] text-text leading-[1.2]">
+              {project.name}
+            </div>
 
-            <p className="text-text-muted text-[14px] leading-[1.7] flex-1">{project.desc}</p>
+            <p className="text-text-muted text-[14px] leading-[1.7] flex-1">
+              {project.desc}
+            </p>
 
             <div className="flex flex-wrap gap-1.5">
               {project.stack.map((item) => (
@@ -477,7 +478,7 @@ export default function Projects({
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`project-link ${link.ghost ? 'text-text-muted' : ''}`}
+                      className={`project-link ${link.ghost ? "text-text-muted" : ""}`}
                     >
                       {link.label}
                     </a>
@@ -504,13 +505,18 @@ export default function Projects({
       </div>
 
       {limit && onViewAll && (
-        <div className="mt-16 flex justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <div
+          className="mt-16 flex justify-center animate-fade-in"
+          style={{ animationDelay: "0.4s" }}
+        >
           <button
             onClick={onViewAll}
             className="group relative inline-flex items-center gap-3 bg-surface border border-border px-8 py-4 rounded-full font-mono text-[13px] tracking-[0.05em] text-text hover:border-accent/50 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-accent/10"
           >
             <span className="relative z-10 uppercase">View All Projects</span>
-            <span className="relative z-10 text-accent group-hover:translate-x-1 transition-transform duration-300">→</span>
+            <span className="relative z-10 text-accent group-hover:translate-x-1 transition-transform duration-300">
+              →
+            </span>
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-accent/5 to-accent2/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
         </div>
