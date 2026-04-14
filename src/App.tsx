@@ -14,6 +14,7 @@ import ManageModal from './components/ManageModal';
 import ProjectInsights from './components/ProjectInsights';
 import OwnerAuth from './components/OwnerAuth';
 import { clearOwnerSession, isOwnerSession } from './components/ownerSession';
+import { HeaderProvider } from './components/HeaderContext';
 
 import type { MediaStore } from './types';
 
@@ -190,7 +191,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <HeaderProvider>
       <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); clearOwnerSession(); }} onOwnerLogin={() => setAuthOpen(true)} />
 
       <main className="animate-fade-in transition-all duration-700">
@@ -281,6 +282,6 @@ export default function App() {
           onClose={handleAuthClose}
         />
       )}
-    </>
+    </HeaderProvider>
   );
 }

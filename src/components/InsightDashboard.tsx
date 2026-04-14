@@ -1,5 +1,7 @@
-import { useId, useState } from 'react';
+import { useId, useState, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
+import { useHeader } from './HeaderContext';
+import DashboardFilters from './DashboardFilters';
 import type {
   AccentTone,
   ProjectBarSection,
@@ -36,12 +38,12 @@ const tonePalette: Record<AccentTone, { hex: string; soft: string; dim: string }
   },
 };
 
-const CHART_WIDTH = 600;
-const CHART_HEIGHT = 280;
+const CHART_WIDTH = 700;
+const CHART_HEIGHT = 400;
 const PLOT_LEFT = 10;
-const PLOT_RIGHT = 570;
+const PLOT_RIGHT = 670;
 const PLOT_TOP = 40;
-const BASELINE_Y = 250;
+const BASELINE_Y = 350;
 type ChartPoint = ProjectLinePoint & { x: number; y: number };
 
 const standardNumberFormatter = new Intl.NumberFormat('en-IN', {
@@ -95,8 +97,7 @@ function getNiceAxisStep(rawStep: number) {
 
 function buildAxisConfig(values: number[]) {
   const maxValue = Math.max(...values, 0);
-  const targetSegmentCount = maxValue >= 1_000_000 ? 6 : 4;
-
+  
   if (maxValue <= 0) {
     return {
       axisMax: 1,
@@ -105,36 +106,82 @@ function buildAxisConfig(values: number[]) {
     };
   }
 
-  const step = getNiceAxisStep(maxValue / targetSegmentCount);
-  const segmentCount = Math.max(1, Math.ceil(maxValue / step));
-  const axisMax = step * segmentCount;
-  const labels = Array.from({ length: segmentCount + 1 }, (_, index) =>
-    formatChartNumber(axisMax - step * index)
-  );
-  const lineYs = Array.from({ length: segmentCount + 1 }, (_, index) =>
-    PLOT_TOP + ((BASELINE_Y - PLOT_TOP) / segmentCount) * index
-  );
+  // Milestones requested by the user for perfect vertical spacing
+  const milestones = [0, 50000, 100000, 500000, 1000000, 1500000, 2000000];
+  const axisMax = milestones.find(m => m >= maxValue) || 2000000;
+  
+  // Use milestones only up to axisMax
+  const activeMilestones = milestones.filter(m => m <= axisMax);
+  activeMilestones.sort((a, b) => b - a);
+
+  const labels: string[] = [];
+  const lineYs: number[] = [];
+
+  // Each segment between milestones takes an equal visual share of the height
+  const segmentCount = activeMilestones.length - 1;
+  const heightPerSegment = (BASELINE_Y - PLOT_TOP) / segmentCount;
+
+  activeMilestones.forEach((val, index) => {
+    let label = '';
+    if (val === 0) label = '0';
+    else if (val < 100000) label = `${val / 1000}K`;
+    else label = `${val / 100000}L`;
+
+    labels.push(label);
+    lineYs.push(PLOT_TOP + index * heightPerSegment);
+  });
 
   return {
     axisMax,
     labels,
     lineYs,
+    activeMilestones,
   };
 }
 
-function getChartPoints(points: ProjectLinePoint[], axisMax?: number): ChartPoint[] {
-  const maxValue = Math.max(axisMax ?? Math.max(...points.map((point) => point.value), 1), 1);
-  const minValue = 0; // Force start from 0 per user requirement
-  const range = Math.max(maxValue - minValue, 1);
-  const step = points.length > 1 ? (PLOT_RIGHT - PLOT_LEFT) / (points.length - 1) : 0;
+function getChartPoints(points: ProjectLinePoint[], axisMax: number): ChartPoint[] {
+  const stepX = points.length > 1 ? (PLOT_RIGHT - PLOT_LEFT) / (points.length - 1) : 0;
+  
+  // Milestones (must match buildAxisConfig)
+  const milestones = [0, 50000, 100000, 500000, 1000000, 1500000, 2000000];
+  const activeMilestones = milestones.filter(m => m <= axisMax);
+  // Sort ascending for easier segment calculation: [0, 50k, 1L, 5L, 10L, 15L, 20L]
+  activeMilestones.sort((a, b) => a - b);
+  
+  const segmentCount = activeMilestones.length - 1;
+  const heightPerSegment = (BASELINE_Y - PLOT_TOP) / segmentCount;
 
   return points.map((point, index) => {
-    const normalized = (point.value - minValue) / range;
+    const val = Math.max(point.value, 0);
+    
+    // Find which segment the value falls into
+    let segmentIndex = 0;
+    for (let i = 0; i < activeMilestones.length - 1; i++) {
+      if (val >= activeMilestones[i] && val <= activeMilestones[i+1]) {
+        segmentIndex = i;
+        break;
+      }
+    }
+    
+    // For ascending activeMilestones:
+    // [0, 50k, 1L, 5L, 10L, 15L, 20L]
+    // index 0: 0 to 50k, index 1: 50k to 1L ...
+    const botVal = activeMilestones[segmentIndex];
+    const topVal = activeMilestones[segmentIndex + 1];
+    
+    let ratioInSegment = 0;
+    if (topVal !== botVal) {
+      ratioInSegment = (val - botVal) / (topVal - botVal);
+    }
+
+    // Y position: Start from bottom of the chart area and go UP
+    const segmentBottomY = BASELINE_Y - segmentIndex * heightPerSegment;
+    const y = segmentBottomY - ratioInSegment * heightPerSegment;
 
     return {
       ...point,
-      x: PLOT_LEFT + step * index,
-      y: BASELINE_Y - normalized * (BASELINE_Y - PLOT_TOP),
+      x: PLOT_LEFT + stepX * index,
+      y,
     };
   });
 }
@@ -463,10 +510,10 @@ function DonutSection({ section }: { section: ProjectDonutSection }) {
   const gradientBaseId = useId().replace(/:/g, '');
 
   // SVG parameters
-  const size = 560;
+  const size = 640;
   const center = size / 2;
-  const radius = 108;
-  const strokeWidth = 40;
+  const radius = 140;
+  const strokeWidth = 60;
   const circumference = 2 * Math.PI * radius;
   const displayTotal = section.totalDisplayValue ?? formatCompactNumber(total);
   const totalLabel = section.totalLabel ?? 'Total';
@@ -514,9 +561,9 @@ function DonutSection({ section }: { section: ProjectDonutSection }) {
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl h-full flex flex-col">
       <h4 className="text-xl font-medium text-text mb-4 text-center">{section.title}</h4>
       
-      <div className="flex-1 flex items-center justify-center min-h-[340px]">
-        <div className="w-full max-w-[460px] aspect-square relative mx-auto flex items-center justify-center">
-          <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full block overflow-hidden">
+      <div className="flex-1 flex items-center justify-center min-h-[460px]">
+        <div className="w-full max-w-[560px] aspect-square relative mx-auto flex items-center justify-center">
+          <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full block overflow-visible">
             <defs>
               {segmentGeometry.map(({ segment, idx }) => {
                 const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
@@ -725,7 +772,7 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
 
   const activeVariant = variants.find((variant) => variant.key === activeVariantKey) ?? variants[0];
   const fallbackContent: ProjectDashboardContent = activeVariant ?? dashboard;
-  const content =
+  const content = 
     dashboard.resolveContent?.({
       selectedState,
       activeVariantKey,
@@ -733,6 +780,49 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
     }) ?? fallbackContent;
   const scopeLabel = selectedState === 'All' ? 'All states' : selectedState;
   const allSections = [...(content.wideSections ?? []), ...(content.gridSections ?? [])];
+
+  const { showDashboardFilters, setShowDashboardFilters, setDashboardContent } = useHeader();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!sentinelRef.current) return;
+      const rect = sentinelRef.current.getBoundingClientRect();
+      // Trigger exactly when the sentinel (placed right above filters) 
+      // reaches the bottom of our fixed navbar (~80px).
+      const isPast = rect.top <= 80;
+      setShowDashboardFilters(isPast);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      setShowDashboardFilters(false);
+      setDashboardContent(null);
+    };
+  }, [setShowDashboardFilters, setDashboardContent]);
+
+  useEffect(() => {
+    setDashboardContent(
+      <DashboardFilters
+        variants={variants}
+        activeVariantKey={activeVariantKey}
+        setActiveVariantKey={setActiveVariantKey}
+        stateFilter={stateFilter}
+        selectedState={selectedState}
+        setSelectedState={setSelectedState}
+        filtersLabel={dashboard.filtersLabel}
+        isCompact={true}
+      />
+    );
+  }, [
+    variants,
+    activeVariantKey,
+    stateFilter,
+    selectedState,
+    dashboard.filtersLabel,
+    setDashboardContent,
+  ]);
 
   return (
     <section className="space-y-12 md:space-y-16 animate-fade-in">
@@ -750,63 +840,24 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
         )}
       </div>
 
+      <div ref={sentinelRef} className="h-px w-full -mb-12" />
+
       {(variants.length > 0 || stateFilter) && (
-        <div className="sticky top-24 z-40 bg-bg/90 backdrop-blur-xl py-5 px-6 rounded-2xl border border-border/60 shadow-lg transition-all">
-          <div className="flex flex-col md:flex-row md:items-start gap-8">
-            {variants.length > 0 && (
-              <div className="space-y-3 flex-1">
-                {dashboard.filtersLabel && (
-                  <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase">
-                    {dashboard.filtersLabel}
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2.5">
-                  {variants.map((variant) => {
-                    const isActive = variant.key === activeVariantKey;
-
-                    return (
-                      <button
-                        key={variant.key}
-                        type="button"
-                        onClick={() => setActiveVariantKey(variant.key)}
-                        className={`px-5 py-2.5 rounded-full border font-mono text-[11px] tracking-[0.06em] transition-all duration-200 ${
-                          isActive
-                            ? 'border-accent bg-accent text-bg shadow-md shadow-accent/20'
-                            : 'border-border text-text-muted bg-surface/50 hover:border-accent/40 hover:text-text'
-                        }`}
-                      >
-                        {variant.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {stateFilter && (
-              <div className="max-w-[280px] w-full space-y-3 shrink-0">
-                <div className="font-mono text-[11px] text-text-muted tracking-[0.12em] uppercase flex justify-between items-center">
-                  <span>{stateFilter.label}</span>
-                </div>
-                <div className="relative group">
-                  <select
-                    value={selectedState}
-                    onChange={(event) => setSelectedState(event.target.value)}
-                    className="w-full appearance-none rounded-xl border border-border bg-surface/80 px-4 py-3 pr-10 text-sm text-text outline-none transition-colors group-hover:border-accent/40 focus:border-accent cursor-pointer shadow-sm"
-                  >
-                    {stateFilter.options.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-accent transition-colors">
-                    ▾
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+        <div 
+          className={`sticky top-24 z-40 bg-bg/90 backdrop-blur-xl py-5 px-6 rounded-2xl border border-border/60 shadow-lg transition-all duration-500 ${
+            showDashboardFilters ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
+          }`}
+        >
+          <DashboardFilters
+            variants={variants}
+            activeVariantKey={activeVariantKey}
+            setActiveVariantKey={setActiveVariantKey}
+            stateFilter={stateFilter}
+            selectedState={selectedState}
+            setSelectedState={setSelectedState}
+            filtersLabel={dashboard.filtersLabel}
+            isCompact={false}
+          />
 
           {dashboard.helperText && (
             <div className="mt-5 pt-4 border-t border-border/40">
@@ -817,7 +868,6 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
           )}
         </div>
       )}
-
       {content.metrics && content.metrics.length > 0 && <MetricsGrid metrics={content.metrics} />}
 
       <div className={`grid grid-cols-1 gap-4 lg:gap-6 ${
