@@ -593,29 +593,21 @@ function buildDonutSegments(
   summary: SummaryRecord,
   variant: (typeof EV_VARIANTS)[number]
 ) {
-  if (variant.key === "all") {
-    return CATEGORY_SEGMENTS.map((segment) => ({
-      label: segment.label,
-      value: summary.totals[segment.totalKey],
-      displayValue: formatCompactNumber(summary.totals[segment.totalKey]),
-      tone: segment.tone,
-    }));
-  }
-
-  const total = summary.totals[variant.totalKey];
-
-  return [
-    {
-      label: variant.label,
-      value: total,
-      displayValue: formatCompactNumber(total),
-      tone: variant.tone,
-    },
-  ];
+  return CATEGORY_SEGMENTS.map((segment) => ({
+    label: segment.label,
+    value: summary.totals[segment.totalKey],
+    displayValue: formatCompactNumber(summary.totals[segment.totalKey]),
+    tone: segment.tone,
+    isEmphasized: variant.key === "all" || segment.totalKey === variant.totalKey,
+  }));
 }
 
 function buildTrendFootnote(selectedState: string) {
-  return "";
+  if (selectedState === "All") {
+    return "Trend combines registrations across all tracked manufacturer states from 2015 to 2024.";
+  }
+
+  return `Trend reflects registrations tied to manufacturers in ${selectedState} from 2015 to 2024.`;
 }
 
 export const evProjectDashboard: ProjectDashboard = {
@@ -665,7 +657,8 @@ export const evProjectDashboard: ProjectDashboard = {
         {
           kind: "donut",
           title: "EV Adoption by Vehicle Category",
-          legendTitle: "vehicle_category",
+          legendTitle: "Vehicle Category",
+          totalLabel: variant.key === "all" ? "Total EVs" : variant.label,
           totalDisplayValue: formatCompactNumber(total),
           segments: buildDonutSegments(summary, variant),
         },

@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type {
   AccentTone,
   ProjectBarSection,
@@ -48,9 +49,9 @@ const standardNumberFormatter = new Intl.NumberFormat('en-IN', {
   useGrouping: true,
 });
 
-const compactNumberFormatter = new Intl.NumberFormat('en-IN', {
+const chartNumberFormatter = new Intl.NumberFormat('en-IN', {
   notation: 'compact',
-  maximumFractionDigits: 1,
+  maximumFractionDigits: 2,
 });
 
 function getTone(tone: AccentTone = 'accent') {
@@ -61,18 +62,68 @@ function formatCompactNumber(value: number) {
   return standardNumberFormatter.format(value);
 }
 
-function buildAxisLabels(values: number[]) {
-  const maxValue = Math.max(...values, 0);
-
-  if (maxValue <= 0) {
-    return ['0', '0', '0'];
-  }
-
-  return [formatCompactNumber(maxValue), formatCompactNumber(maxValue / 2), '0'];
+function formatChartNumber(value: number) {
+  return chartNumberFormatter.format(value);
 }
 
-function getChartPoints(points: ProjectLinePoint[]): ChartPoint[] {
-  const maxValue = Math.max(...points.map((point) => point.value), 1);
+function getNiceAxisStep(rawStep: number) {
+  if (rawStep <= 0) {
+    return 1;
+  }
+
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+  const normalized = rawStep / magnitude;
+
+  if (normalized <= 1) {
+    return magnitude;
+  }
+
+  if (normalized <= 2) {
+    return 2 * magnitude;
+  }
+
+  if (normalized <= 3) {
+    return 2.5 * magnitude;
+  }
+
+  if (normalized <= 7) {
+    return 5 * magnitude;
+  }
+
+  return 10 * magnitude;
+}
+
+function buildAxisConfig(values: number[]) {
+  const maxValue = Math.max(...values, 0);
+  const targetSegmentCount = maxValue >= 1_000_000 ? 6 : 4;
+
+  if (maxValue <= 0) {
+    return {
+      axisMax: 1,
+      labels: ['1', '0'],
+      lineYs: [PLOT_TOP, BASELINE_Y],
+    };
+  }
+
+  const step = getNiceAxisStep(maxValue / targetSegmentCount);
+  const segmentCount = Math.max(1, Math.ceil(maxValue / step));
+  const axisMax = step * segmentCount;
+  const labels = Array.from({ length: segmentCount + 1 }, (_, index) =>
+    formatChartNumber(axisMax - step * index)
+  );
+  const lineYs = Array.from({ length: segmentCount + 1 }, (_, index) =>
+    PLOT_TOP + ((BASELINE_Y - PLOT_TOP) / segmentCount) * index
+  );
+
+  return {
+    axisMax,
+    labels,
+    lineYs,
+  };
+}
+
+function getChartPoints(points: ProjectLinePoint[], axisMax?: number): ChartPoint[] {
+  const maxValue = Math.max(axisMax ?? Math.max(...points.map((point) => point.value), 1), 1);
   const minValue = 0; // Force start from 0 per user requirement
   const range = Math.max(maxValue - minValue, 1);
   const step = points.length > 1 ? (PLOT_RIGHT - PLOT_LEFT) / (points.length - 1) : 0;
@@ -105,6 +156,23 @@ function buildAreaPath(points: ChartPoint[]) {
 
   return `${linePath} L ${lastPoint.x},${BASELINE_Y} L ${firstPoint.x},${BASELINE_Y} Z`;
 }
+
+type DonutSegmentGeometry = {
+  idx: number;
+  segment: ProjectDonutSection['segments'][number];
+  segmentPercent: number;
+  endPercent: number;
+  midRad: number;
+  dashOffset: number;
+  rotation: number;
+  labelX: number;
+  labelY: number;
+  lineEndX: number;
+  lineEndY: number;
+  arcPointX: number;
+  arcPointY: number;
+  textAnchor: 'start' | 'end' | 'middle';
+};
 
 function MetricsGrid({ metrics }: { metrics: ProjectMetric[] }) {
   const columnClass =
@@ -183,23 +251,26 @@ function BarsSection({ section }: { section: ProjectBarSection }) {
 function LineSection({ section }: { section: ProjectLineSection }) {
   const gradientId = useId().replace(/:/g, '');
   const tone = getTone(section.tone ?? 'accent');
-  const chartPoints = getChartPoints(section.points);
+  const axisConfig = buildAxisConfig(section.points.map((point) => point.value));
+  const chartPoints = getChartPoints(section.points, axisConfig.axisMax);
   const linePath = buildLinePath(chartPoints);
   const areaPath = buildAreaPath(chartPoints);
-  const yAxisLabels = section.yAxisLabels ?? buildAxisLabels(section.points.map((point) => point.value));
+  const customYAxisLabels = section.yAxisLabels;
+  const yAxisLabels = customYAxisLabels ?? axisConfig.labels;
+  const yAxisLineYs =
+    customYAxisLabels && customYAxisLabels.length > 1
+      ? Array.from({ length: customYAxisLabels.length }, (_, index) =>
+          PLOT_TOP + ((BASELINE_Y - PLOT_TOP) / (customYAxisLabels.length - 1)) * index
+        )
+      : axisConfig.lineYs;
+  const xAxisGridStyle = {
+    gridTemplateColumns: `repeat(${Math.max(section.points.length, 1)}, minmax(0, 1fr))`,
+  };
 
   return (
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl flex flex-col h-full min-h-[380px]">
       <h4 className="text-xl font-medium text-text mb-8">{section.title}</h4>
-      <div className="flex-1 relative pl-8 pr-2 pb-12">
-        {yAxisLabels.length > 0 && (
-          <div className="absolute left-0 top-0 bottom-12 flex flex-col justify-between text-xs font-mono text-text-muted/70">
-            {yAxisLabels.map((label) => (
-              <span key={`${section.title}-${label}`}>{label}</span>
-            ))}
-          </div>
-        )}
-
+      <div className="flex-1 flex items-end pl-10 pr-2">
         <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="w-full h-auto overflow-visible">
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -208,8 +279,35 @@ function LineSection({ section }: { section: ProjectLineSection }) {
             </linearGradient>
           </defs>
 
+          {yAxisLabels.map((label, index) => (
+            <text
+              key={`${section.title}-${label}`}
+              x={PLOT_LEFT - 6}
+              y={(yAxisLineYs[index] ?? BASELINE_Y) + 4}
+              textAnchor="end"
+              className="font-mono text-[11px] fill-text-muted/70"
+            >
+              {label}
+            </text>
+          ))}
+
           <path d={areaPath} fill={`url(#${gradientId})`} className="transition-all duration-1000 ease-in-out opacity-80" />
-          <line x1={PLOT_LEFT} y1={BASELINE_Y} x2={PLOT_RIGHT} y2={BASELINE_Y} stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1" />
+          {yAxisLineYs.map((lineY, index) => {
+            const isBaseline = index === yAxisLineYs.length - 1;
+
+            return (
+              <line
+                key={`${section.title}-grid-${index}`}
+                x1={PLOT_LEFT}
+                y1={lineY}
+                x2={PLOT_RIGHT}
+                y2={lineY}
+                stroke={isBaseline ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)'}
+                strokeWidth="1"
+                strokeDasharray={isBaseline ? undefined : '4 8'}
+              />
+            );
+          })}
           
           <path
             d={linePath}
@@ -221,32 +319,50 @@ function LineSection({ section }: { section: ProjectLineSection }) {
             style={{ filter: `drop-shadow(0 0 12px ${tone.soft})` }}
           />
 
-          {chartPoints.map((point) => (
-            <g key={point.label} className="group/point">
-              <circle
-                cx={point.x}
-                cy={point.y}
-                r="6"
-                fill={tone.hex}
-                stroke={tone.hex}
-                strokeWidth="2"
-                className="transition-all duration-300 group-hover/point:r-8"
-              />
-              <text
-                x={point.x}
-                y={point.y - 18}
-                textAnchor="middle"
-                className="font-mono text-[16px] fill-white pointer-events-none"
-                style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
-              >
-                {formatCompactNumber(point.value)}
-              </text>
-            </g>
-          ))}
+          {chartPoints.map((point, index) => {
+            const previousPoint = chartPoints[index - 1];
+            const nextPoint = chartPoints[index + 1];
+            const isPeak =
+              previousPoint !== undefined &&
+              nextPoint !== undefined &&
+              point.y < previousPoint.y &&
+              point.y < nextPoint.y;
+            const isValley =
+              previousPoint !== undefined &&
+              nextPoint !== undefined &&
+              point.y > previousPoint.y &&
+              point.y > nextPoint.y;
+            const labelOffset = isPeak ? 18 : isValley ? 38 : index % 2 === 0 ? 22 : 34;
+            const labelY = Math.max(point.y - labelOffset, 18);
+            const pointLabel = point.displayValue || formatChartNumber(point.value);
+
+            return (
+              <g key={point.label} className="group/point">
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r="6"
+                  fill={tone.hex}
+                  stroke={tone.hex}
+                  strokeWidth="2"
+                  className="transition-all duration-300 group-hover/point:r-8"
+                />
+                <text
+                  x={point.x}
+                  y={labelY}
+                  textAnchor="middle"
+                  className="font-mono text-[13px] fill-white/90 pointer-events-none"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.45))' }}
+                >
+                  {pointLabel}
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
-      <div className="grid grid-cols-10 mt-4 px-2">
+      <div className="grid mt-4 px-2" style={xAxisGridStyle}>
         {section.points.map((point) => (
           <span
             key={`${section.title}-${point.label}-label`}
@@ -289,7 +405,8 @@ function LineSection({ section }: { section: ProjectLineSection }) {
 
 function ColumnSection({ section }: { section: ProjectColumnSection }) {
   const maxValue = Math.max(...section.items.map((item) => item.value), 1);
-  const yAxisLabels = section.yAxisLabels ?? buildAxisLabels(section.items.map((item) => item.value));
+  const axisConfig = buildAxisConfig(section.items.map((item) => item.value));
+  const yAxisLabels = section.yAxisLabels ?? axisConfig.labels;
 
   return (
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl h-full flex flex-col">
@@ -343,28 +460,75 @@ function ColumnSection({ section }: { section: ProjectColumnSection }) {
 
 function DonutSection({ section }: { section: ProjectDonutSection }) {
   const total = Math.max(section.segments.reduce((sum, segment) => sum + segment.value, 0), 1);
-  
-  // SVG parameters
-  const size = 560; // Increased to contain wider labels
-  const center = size / 2;
-  const radius = 90;
-  const strokeWidth = 35;
-  const circumference = 2 * Math.PI * radius;
+  const gradientBaseId = useId().replace(/:/g, '');
 
-  let currentPercent = 0;
+  // SVG parameters
+  const size = 560;
+  const center = size / 2;
+  const radius = 108;
+  const strokeWidth = 40;
+  const circumference = 2 * Math.PI * radius;
+  const displayTotal = section.totalDisplayValue ?? formatCompactNumber(total);
+  const totalLabel = section.totalLabel ?? 'Total';
+  const segmentGeometry = section.segments.reduce<DonutSegmentGeometry[]>((acc, segment, idx) => {
+    const startPercent = acc.length === 0 ? 0 : acc[acc.length - 1].endPercent;
+    const segmentPercent = (segment.value / total) * 100;
+    const endPercent = startPercent + segmentPercent;
+    const rotation = (startPercent / 100) * 360 - 90;
+    const midAngle = startPercent + segmentPercent / 2;
+    const midRad = ((midAngle * 3.6 - 90) * Math.PI) / 180;
+    const calloutRadius = radius + 55;
+    const labelOffset = 20;
+    const labelX = center + (calloutRadius + labelOffset) * Math.cos(midRad);
+    const labelY = center + (calloutRadius + labelOffset) * Math.sin(midRad);
+    const lineEndX = center + calloutRadius * Math.cos(midRad);
+    const lineEndY = center + calloutRadius * Math.sin(midRad);
+    const arcPointOff = 10;
+    const arcPointX = center + (radius + arcPointOff) * Math.cos(midRad);
+    const arcPointY = center + (radius + arcPointOff) * Math.sin(midRad);
+    const textAnchor =
+      Math.cos(midRad) > 0.1 ? 'start' : Math.cos(midRad) < -0.1 ? 'end' : 'middle';
+
+    acc.push({
+      idx,
+      segment,
+      segmentPercent,
+      endPercent,
+      midRad,
+      dashOffset: circumference - (segmentPercent / 100) * circumference,
+      rotation,
+      labelX,
+      labelY,
+      lineEndX,
+      lineEndY,
+      arcPointX,
+      arcPointY,
+      textAnchor,
+    });
+
+    return acc;
+  }, []);
+  const renderedSegmentGeometry = [...segmentGeometry].sort((a, b) => b.segmentPercent - a.segmentPercent);
 
   return (
     <div className="bg-surface2/30 border border-border/50 p-6 rounded-2xl h-full flex flex-col">
       <h4 className="text-xl font-medium text-text mb-4 text-center">{section.title}</h4>
       
       <div className="flex-1 flex items-center justify-center min-h-[340px]">
-        <div className="w-full max-w-[400px] aspect-square relative mx-auto flex items-center justify-center">
+        <div className="w-full max-w-[460px] aspect-square relative mx-auto flex items-center justify-center">
           <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full block overflow-hidden">
             <defs>
-              {section.segments.map((segment, idx) => {
+              {segmentGeometry.map(({ segment, idx }) => {
                 const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
                 return (
-                  <linearGradient key={`grad-${idx}`} id={`grad-${idx}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <linearGradient
+                    key={`${gradientBaseId}-grad-${idx}`}
+                    id={`${gradientBaseId}-grad-${idx}`}
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%"
+                  >
                     <stop offset="0%" stopColor={segmentTone.hex} />
                     <stop offset="100%" stopColor={segmentTone.hex} stopOpacity="0.8" />
                   </linearGradient>
@@ -372,66 +536,110 @@ function DonutSection({ section }: { section: ProjectDonutSection }) {
               })}
             </defs>
 
-            {section.segments.map((segment, idx) => {
-              const segmentPercent = (segment.value / total) * 100;
-              const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
-              
-              const dashOffset = circumference - (segmentPercent / 100) * circumference;
-              const rotation = (currentPercent / 100) * 360 - 90;
-              
-              // Callout position - moved further out for "normal" spacing
-              const midAngle = currentPercent + segmentPercent / 2;
-              const midRad = ((midAngle * 3.6 - 90) * Math.PI) / 180;
-              
-              const calloutRadius = radius + 55;
-              const isRightSide = Math.cos(midRad) > 0.1;
-              const isLeftSide = Math.cos(midRad) < -0.1;
-              
-              const labelX = center + (calloutRadius + 20) * Math.cos(midRad);
-              const labelY = center + (calloutRadius + 20) * Math.sin(midRad);
-              const lineEndX = center + calloutRadius * Math.cos(midRad);
-              const lineEndY = center + calloutRadius * Math.sin(midRad);
-              const arcPointOff = 10; 
-              const arcPointX = center + (radius + arcPointOff) * Math.cos(midRad);
-              const arcPointY = center + (radius + arcPointOff) * Math.sin(midRad);
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={strokeWidth}
+            />
 
-              const segmentNode = (
-                <g key={segment.label} className="group/segment">
+            {renderedSegmentGeometry.map(({ segment, idx, segmentPercent, midRad, dashOffset, rotation, labelX, labelY, lineEndX, lineEndY, arcPointX, arcPointY, textAnchor }) => {
+              const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
+              const isEmphasized = segment.isEmphasized ?? true;
+              const segmentOpacity = isEmphasized ? 1 : 0.3;
+              const showTinyMarker = segmentPercent < 1.2;
+              const showCallout = segmentPercent > 0;
+              const markerRadius = radius;
+              const markerX = center + markerRadius * Math.cos(midRad);
+              const markerY = center + markerRadius * Math.sin(midRad);
+              const calloutLineRadius = showTinyMarker ? radius + 72 : radius + 55;
+              const calloutLabelRadius = calloutLineRadius + 24;
+              const tinyLabelNudgeY =
+                showTinyMarker && Math.sin(midRad) < -0.2 ? -10 :
+                showTinyMarker && Math.sin(midRad) > 0.2 ? 10 :
+                0;
+              const adjustedLineEndX = center + calloutLineRadius * Math.cos(midRad);
+              const adjustedLineEndY = center + calloutLineRadius * Math.sin(midRad);
+              const adjustedLabelX = center + calloutLabelRadius * Math.cos(midRad);
+              const adjustedLabelY = center + calloutLabelRadius * Math.sin(midRad) + tinyLabelNudgeY;
+              const segmentStyle = {
+                '--donut-start': `${circumference}`,
+                '--donut-end': `${dashOffset}`,
+                '--donut-opacity': `${segmentOpacity}`,
+                strokeDashoffset: dashOffset,
+                opacity: segmentOpacity,
+                transformBox: 'fill-box',
+                transformOrigin: 'center',
+                transform: `rotate(${rotation}deg)`,
+                animation: `donutSegmentReveal 900ms cubic-bezier(0.22,1,0.36,1) ${idx * 80}ms both`,
+              } as CSSProperties;
+              const calloutStyle = {
+                opacity: segmentOpacity,
+                animation: `donutContentFade 350ms ease ${180 + idx * 70}ms both`,
+              } as CSSProperties;
+
+              return (
+                <g
+                  key={`${segment.label}-${segment.value}-${segment.isEmphasized ? 'active' : 'muted'}`}
+                  className="group/segment"
+                >
                   <circle
                     cx={center}
                     cy={center}
                     r={radius}
                     fill="none"
-                    stroke={`url(#grad-${idx})`}
+                    stroke={`url(#${gradientBaseId}-grad-${idx})`}
                     strokeWidth={strokeWidth}
                     strokeDasharray={circumference}
-                    strokeDashoffset={dashOffset}
-                    strokeLinecap="round"
-                    transform={`rotate(${rotation} ${center} ${center})`}
-                    className="transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] hover:opacity-90 cursor-pointer"
+                    strokeLinecap={segmentPercent >= 99.9 ? 'butt' : 'round'}
+                    className="cursor-pointer"
+                    style={segmentStyle}
                   />
+                  {showTinyMarker && (
+                    <circle
+                      cx={markerX}
+                      cy={markerY}
+                      r={6}
+                      fill={segmentTone.hex}
+                      style={{
+                        opacity: segmentOpacity,
+                        animation: `donutContentFade 350ms ease ${150 + idx * 70}ms both`,
+                      }}
+                    />
+                  )}
                   
-                  {segmentPercent > 2 && (
-                    <g className="transition-opacity duration-500">
+                  {showCallout && (
+                    <g style={calloutStyle}>
                       <line
                         x1={arcPointX}
                         y1={arcPointY}
-                        x2={lineEndX}
-                        y2={lineEndY}
-                        stroke="rgba(255,255,255,0.2)"
+                        x2={showTinyMarker ? adjustedLineEndX : lineEndX}
+                        y2={showTinyMarker ? adjustedLineEndY : lineEndY}
+                        stroke={segmentTone.soft}
                         strokeWidth="1"
                       />
                       <text
-                        x={labelX}
-                        y={labelY}
-                        textAnchor={isRightSide ? "start" : isLeftSide ? "end" : "middle"}
+                        x={showTinyMarker ? adjustedLabelX : labelX}
+                        y={showTinyMarker ? adjustedLabelY : labelY}
+                        textAnchor={textAnchor}
                         dominantBaseline="middle"
                         className="fill-white font-mono text-[14px]"
                       >
-                        <tspan x={labelX} dy="-0.6em" className="font-bold">
-                          {formatCompactNumber(segment.value)}
+                        <tspan
+                          x={showTinyMarker ? adjustedLabelX : labelX}
+                          dy="-0.6em"
+                          className="font-bold"
+                          style={{ fill: segmentTone.hex }}
+                        >
+                          {segment.displayValue}
                         </tspan>
-                        <tspan x={labelX} dy="1.2em" className="fill-text-muted font-normal text-[11px]">
+                        <tspan
+                          x={showTinyMarker ? adjustedLabelX : labelX}
+                          dy="1.2em"
+                          className="fill-text-muted font-normal text-[11px]"
+                        >
                           {segmentPercent.toFixed(1)}%
                         </tspan>
                       </text>
@@ -439,14 +647,22 @@ function DonutSection({ section }: { section: ProjectDonutSection }) {
                   )}
                 </g>
               );
-
-              currentPercent += segmentPercent;
-              return segmentNode;
             })}
             
-            <text x={center} y={center} textAnchor="middle" dominantBaseline="middle" className="pointer-events-none">
-              <tspan x={center} dy="-0.4em" className="text-xs font-mono fill-text-muted uppercase tracking-[0.2em]">Total</tspan>
-              <tspan x={center} dy="1.4em" className="text-xl font-mono fill-white font-bold">{formatCompactNumber(total)}</tspan>
+            <text
+              x={center}
+              y={center}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="pointer-events-none"
+              style={{ animation: 'donutContentFade 350ms ease 240ms both' }}
+            >
+              <tspan x={center} dy="-0.4em" className="text-xs font-mono fill-text-muted uppercase tracking-[0.2em]">
+                {totalLabel}
+              </tspan>
+              <tspan x={center} dy="1.4em" className="text-xl font-mono fill-white font-bold">
+                {displayTotal}
+              </tspan>
             </text>
           </svg>
         </div>
@@ -460,14 +676,19 @@ function DonutSection({ section }: { section: ProjectDonutSection }) {
         )}
         {section.segments.map((segment) => {
           const segmentTone = getTone(segment.tone ?? section.tone ?? 'accent');
+          const isEmphasized = segment.isEmphasized ?? true;
           return (
-            <div key={`${section.title}-${segment.label}`} className="flex items-center justify-between gap-4">
+            <div
+              key={`${section.title}-${segment.label}`}
+              className="flex items-center justify-between gap-4 transition-opacity duration-200"
+              style={{ opacity: isEmphasized ? 1 : 0.45 }}
+            >
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: segmentTone.hex }} />
                 <span className="text-text text-xs">{segment.label}</span>
               </div>
               <span className="font-mono text-text-muted text-[11px]">
-                {formatCompactNumber(segment.value)}
+                {segment.displayValue}
               </span>
             </div>
           );

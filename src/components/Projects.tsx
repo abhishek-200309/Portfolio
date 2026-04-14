@@ -102,12 +102,14 @@ export interface ProjectDonutDatum {
   value: number;
   displayValue: string;
   tone?: AccentTone;
+  isEmphasized?: boolean;
 }
 
 export interface ProjectDonutSection extends ProjectDashboardSectionBase {
   kind: 'donut';
   segments: ProjectDonutDatum[];
   legendTitle?: string;
+  totalLabel?: string;
   totalDisplayValue?: string;
 }
 
