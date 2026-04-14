@@ -163,9 +163,23 @@ export default function App() {
     setView('projects');
   };
 
-  const handleBackToHome = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setView('home');
+  const handleNavigate = (sectionId: string) => {
+    if (view !== 'home') {
+      setView('home');
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else if (sectionId === 'hero') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
   };
 
   const handleAddFiles = async (pid: number, files: FileList) => {
@@ -192,7 +206,14 @@ export default function App() {
 
   return (
     <HeaderProvider>
-      <Navbar activeSection={activeSection} isOwner={isOwner} onOwnerLogout={() => { setIsOwner(false); clearOwnerSession(); }} onOwnerLogin={() => setAuthOpen(true)} />
+      <Navbar 
+        activeSection={activeSection} 
+        isOwner={isOwner} 
+        onOwnerLogout={() => { setIsOwner(false); clearOwnerSession(); }} 
+        onOwnerLogin={() => setAuthOpen(true)}
+        view={view}
+        onNavigate={handleNavigate}
+      />
 
       <main className="animate-fade-in transition-all duration-700">
         {view === 'home' && (
@@ -218,7 +239,7 @@ export default function App() {
           <div className="pt-20 min-h-screen animate-slide-up">
             <div className="max-w-[1200px] mx-auto px-12 pt-12">
               <button 
-                onClick={handleBackToHome}
+                onClick={() => handleNavigate('hero')}
                 className="group flex items-center gap-2 text-text-muted font-mono text-xs hover:text-accent transition-colors mb-4"
               >
                 <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Home

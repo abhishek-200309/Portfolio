@@ -135,7 +135,10 @@ export default function ProjectInsights({ project, media = [], onClose }: Props)
             </h3>
             <div className="bg-accent/5 border border-accent/10 p-6 rounded-2xl text-text-muted text-[16px] leading-relaxed relative overflow-hidden">
               <div className="absolute bottom-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-10 -mb-10" />
-              <p className="relative z-10">{project.insights.outcomes}</p>
+              <p className="relative z-10 whitespace-pre-line leading-tight">
+  {project.insights.outcomes}
+</p>
+
             </div>
           </section>
         </div>

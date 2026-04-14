@@ -182,7 +182,15 @@ const projects: Project[] = [
         'DAX for complex calculated measures',
       ],
       challenges: 'Handling missing geographic data across various states required mapping custom regions. Optimizing DAX queries for a large dataset (over 1M rows) to ensure the dashboard remained responsive was a significant hurdle. Furthermore, aligning public data sources with differing formats demanded rigorous ETL processes.',
-      outcomes: 'Delivered an interactive dashboard that clearly highlighted the 300% YoY growth in 2-wheeler EVs and identified key states leading the transition, providing actionable insights for infrastructure planning.',
+outcomes: `
+• EV adoption remained minimal until 2019, followed by a sharp acceleration post-2021, indicating a strong policy and infrastructure push.
+
+• 2023 marks the peak adoption year, while 2024 shows a controlled slowdown rather than decline.
+
+• Over 95% of EV adoption comes from two- and three-wheelers, highlighting India’s focus on affordable and commercial mobility rather than passenger cars.
+
+• Market leadership is concentrated among a few manufacturers, suggesting early consolidation in the EV ecosystem.
+`,
       dashboard: evProjectDashboard,
     },
   },

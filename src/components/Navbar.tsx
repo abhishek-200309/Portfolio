@@ -6,10 +6,14 @@ interface NavbarProps {
   isOwner: boolean;
   onOwnerLogin: () => void;
   onOwnerLogout: () => void;
+  view: 'home' | 'projects' | 'insights';
+  onNavigate: (sectionId: string) => void;
 }
 
 export default function Navbar({
   activeSection,
+  view,
+  onNavigate,
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const { showDashboardFilters, dashboardContent } = useHeader();
@@ -33,6 +37,7 @@ export default function Navbar({
     >
       <a
         href="#hero"
+        onClick={(e) => { e.preventDefault(); onNavigate('hero'); }}
         className="font-mono text-[13px] text-accent tracking-[0.08em] no-underline shrink-0"
       >
         AK.portfolio
@@ -47,7 +52,8 @@ export default function Navbar({
               <li key={href}>
                 <a
                   href={href}
-                  className={`font-mono text-[12px] tracking-[0.05em] no-underline transition-colors duration-200 ${activeSection === href.replace("#", "") ? "text-accent" : "text-text-muted hover:text-accent"}`}
+                  onClick={(e) => { e.preventDefault(); onNavigate(href.replace('#', '')); }}
+                  className={`font-mono text-[12px] tracking-[0.05em] no-underline transition-colors duration-200 ${view === 'home' && activeSection === href.replace("#", "") ? "text-accent" : "text-text-muted hover:text-accent"}`}
                 >
                   {label}
                 </a>
@@ -68,6 +74,7 @@ export default function Navbar({
       <div className="flex items-center gap-3 shrink-0">
         <a
           href="#contact"
+          onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}
           className="font-mono text-[12px] text-bg bg-accent px-5 py-2 rounded tracking-[0.05em] no-underline transition-opacity duration-200 hover:opacity-85"
         >
           Get in Touch

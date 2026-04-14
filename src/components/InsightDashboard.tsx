@@ -39,11 +39,11 @@ const tonePalette: Record<AccentTone, { hex: string; soft: string; dim: string }
 };
 
 const CHART_WIDTH = 700;
-const CHART_HEIGHT = 400;
+const CHART_HEIGHT = 870;
 const PLOT_LEFT = 10;
 const PLOT_RIGHT = 670;
 const PLOT_TOP = 40;
-const BASELINE_Y = 350;
+const BASELINE_Y = 870;
 type ChartPoint = ProjectLinePoint & { x: number; y: number };
 
 const standardNumberFormatter = new Intl.NumberFormat('en-IN', {
@@ -332,7 +332,7 @@ function LineSection({ section }: { section: ProjectLineSection }) {
               x={PLOT_LEFT - 6}
               y={(yAxisLineYs[index] ?? BASELINE_Y) + 4}
               textAnchor="end"
-              className="font-mono text-[11px] fill-text-muted/70"
+              className="font-mono text-[16px] fill-text-muted/70"
             >
               {label}
             </text>
@@ -398,7 +398,7 @@ function LineSection({ section }: { section: ProjectLineSection }) {
                   x={point.x}
                   y={labelY}
                   textAnchor="middle"
-                  className="font-mono text-[13px] fill-white/90 pointer-events-none"
+                  className="font-mono text-[18px] fill-white/90 pointer-events-none"
                   style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.45))' }}
                 >
                   {pointLabel}
