@@ -658,7 +658,7 @@ export const evProjectDashboard: ProjectDashboard = {
           kind: "donut",
           title: "EV Adoption by Vehicle Category",
           legendTitle: "Vehicle Category",
-          totalLabel: variant.key === "all" ? "Total EVs" : variant.label,
+          totalLabel: variant.key === "all" ? "Total Registration" : variant.label,
           totalDisplayValue: formatCompactNumber(total),
           segments: buildDonutSegments(summary, variant),
         },
