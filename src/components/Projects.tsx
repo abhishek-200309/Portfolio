@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useRef, useState } from 'react';
+// import { useState } from 'react';
 import type { MediaStore } from '../types';
 import { evProjectDashboard } from '../data/evDashboardData';
 
