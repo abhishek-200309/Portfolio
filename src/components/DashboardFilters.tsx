@@ -1,4 +1,3 @@
-import React from 'react';
 import type { ProjectDashboardVariant } from './Projects';
 
 interface DashboardFiltersProps {

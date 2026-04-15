@@ -68,32 +68,32 @@ function formatChartNumber(value: number) {
   return chartNumberFormatter.format(value);
 }
 
-function getNiceAxisStep(rawStep: number) {
-  if (rawStep <= 0) {
-    return 1;
-  }
+// // function getNiceAxisStep(rawStep: number) {
+// //   if (rawStep <= 0) {
+// //     return 1;
+// //   }
 
-  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
-  const normalized = rawStep / magnitude;
+//   const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+//   const normalized = rawStep / magnitude;
 
-  if (normalized <= 1) {
-    return magnitude;
-  }
+//   if (normalized <= 1) {
+//     return magnitude;
+//   }
 
-  if (normalized <= 2) {
-    return 2 * magnitude;
-  }
+//   if (normalized <= 2) {
+//     return 2 * magnitude;
+//   }
 
-  if (normalized <= 3) {
-    return 2.5 * magnitude;
-  }
+//   if (normalized <= 3) {
+//     return 2.5 * magnitude;
+//   }
 
-  if (normalized <= 7) {
-    return 5 * magnitude;
-  }
+//   if (normalized <= 7) {
+//     return 5 * magnitude;
+//   }
 
-  return 10 * magnitude;
-}
+//   return 10 * magnitude;
+// }
 
 function buildAxisConfig(values: number[]) {
   const maxValue = Math.max(...values, 0);

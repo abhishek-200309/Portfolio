@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import type { Project } from './Projects';
 import type { MediaItem } from '../types';
 import InsightDashboard from './InsightDashboard';

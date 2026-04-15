@@ -330,84 +330,82 @@ outcomes: `
   },
 ];
 
-function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: MediaStore; onClick: () => void }) {
-  const items = mediaStore[pid] ?? [];
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+// function MediaPreview({ pid, mediaStore, onClick }: { pid: number; mediaStore: MediaStore; onClick: () => void }) {
+//   const items = mediaStore[pid] ?? [];
+//   const videoRef = useRef<HTMLVideoElement>(null);
+//   const [isPlaying, setIsPlaying] = useState(false);
 
-  const handleMouseEnter = () => {
-    setIsPlaying(true);
-    videoRef.current?.play().catch(() => {});
-  };
+//   const handleMouseEnter = () => {
+//     setIsPlaying(true);
+//     videoRef.current?.play().catch(() => {});
+//   };
 
-  const handleMouseLeave = () => {
-    setIsPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  };
+//   const handleMouseLeave = () => {
+//     setIsPlaying(false);
+//     if (videoRef.current) {
+//       videoRef.current.pause();
+//       videoRef.current.currentTime = 0;
+//     }
+//   };
 
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`w-full aspect-video rounded-xl overflow-hidden bg-surface2 border border-border relative flex-shrink-0 group flex items-center justify-center ${items.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
-    >
-      {items.length === 0 ? (
-        <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-text-dim">
-          <div className="text-[32px] opacity-30">🖼</div>
-          <span className="font-mono text-[10px] tracking-[0.06em]">No media yet</span>
-        </div>
-      ) : (
-        <>
-          {items[0].type === 'video' ? (
-            <>
-              {items[0].poster && !isPlaying && (
-                <img
-                  src={items[0].poster}
-                  alt="thumbnail"
-                  onError={(event) => {
-                    event.currentTarget.style.display = 'none';
-                  }}
-                  className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover:scale-[1.04] z-10"
-                />
-              )}
-              <video
-                ref={videoRef}
-                src={items[0].src}
-                loop
-                muted
-                playsInline
-                preload="auto"
-                controlsList="nodownload noplaybackrate"
-                disablePictureInPicture
-                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
-              />
-            </>
-          ) : (
-            <img
-              src={items[0].src}
-              alt="project screenshot"
-              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
-            />
-          )}
-          {items.length > 1 && (
-            <div className="absolute bottom-2 right-2 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded pointer-events-none">
-              +{items.length - 1} more
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
+//   return (
+//     <div
+//       onClick={onClick}
+//       onMouseEnter={handleMouseEnter}
+//       onMouseLeave={handleMouseLeave}
+//       className={`w-full aspect-video rounded-xl overflow-hidden bg-surface2 border border-border relative flex-shrink-0 group flex items-center justify-center ${items.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
+//     >
+//       {items.length === 0 ? (
+//         <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-text-dim">
+//           <div className="text-[32px] opacity-30">🖼</div>
+//           <span className="font-mono text-[10px] tracking-[0.06em]">No media yet</span>
+//         </div>
+//       ) : (
+//         <>
+//           {items[0].type === 'video' ? (
+//             <>
+//               {items[0].poster && !isPlaying && (
+//                 <img
+//                   src={items[0].poster}
+//                   alt="thumbnail"
+//                   onError={(event) => {
+//                     event.currentTarget.style.display = 'none';
+//                   }}
+//                   className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-transform duration-300 group-hover:scale-[1.04] z-10"
+//                 />
+//               )}
+//               <video
+//                 ref={videoRef}
+//                 src={items[0].src}
+//                 loop
+//                 muted
+//                 playsInline
+//                 preload="auto"
+//                 controlsList="nodownload noplaybackrate"
+//                 disablePictureInPicture
+//                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+//               />
+//             </>
+//           ) : (
+//             <img
+//               src={items[0].src}
+//               alt="project screenshot"
+//               className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+//             />
+//           )}
+//           {items.length > 1 && (
+//             <div className="absolute bottom-2 right-2 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded pointer-events-none">
+//               +{items.length - 1} more
+//             </div>
+//           )}
+//         </>
+//       )}
+//     </div>
+//   );
+// }
 
 export default function Projects({
-  mediaStore,
   isOwner,
-  onOpenLightbox,
   onOpenManage,
   onOpenInsights,
   limit,
