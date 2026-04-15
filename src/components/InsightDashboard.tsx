@@ -841,10 +841,10 @@ export default function InsightDashboard({ dashboard }: { dashboard: ProjectDash
       </div>
 
       <div ref={sentinelRef} className="h-px w-full -mb-12" />
-
+handle
       {(variants.length > 0 || stateFilter) && (
         <div 
-          className={`sticky top-24 z-40 bg-bg/90 backdrop-blur-xl py-5 px-6 rounded-2xl border border-border/60 shadow-lg transition-all duration-500 ${
+          className={`sticky top-24 z-50 bg-bg/90 backdrop-blur-xl py-5 px-6 rounded-2xl border border-border/60 shadow-lg transition-all duration-500 ${
             showDashboardFilters ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
           }`}
         >

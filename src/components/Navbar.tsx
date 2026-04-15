@@ -71,7 +71,7 @@ export default function Navbar({
         )}
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
+      {/* <div className="flex items-center gap-3 shrink-0">
         <a
           href="#contact"
           onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}
@@ -79,7 +79,7 @@ export default function Navbar({
         >
           Get in Touch
         </a>
-      </div>
+      </div> */}
     </nav>
   );
 }
