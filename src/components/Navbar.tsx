@@ -33,7 +33,7 @@ export default function Navbar({
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-12 py-5 transition-all duration-300 border-b border-border backdrop-blur-xl ${scrolled ? "bg-bg/90" : "bg-bg/70"}`}
+      className={`fixed top-0 left-0 right-0 z-[100] flex flex-wrap md:flex-nowrap items-center justify-between px-6 md:px-12 py-4 md:py-5 transition-all duration-300 border-b border-border backdrop-blur-xl ${scrolled ? "bg-bg/90" : "bg-bg/70"}`}
     >
       <a
         href="#hero"
@@ -43,7 +43,7 @@ export default function Navbar({
         AK.portfolio
       </a>
 
-      <div className="flex-1 flex justify-center px-8 overflow-hidden relative min-h-[40px] items-center">
+      <div className={`flex justify-center overflow-hidden relative items-center min-w-0 transition-all duration-500 w-full order-last md:w-auto md:flex-1 md:order-none md:px-8 md:min-h-[40px] md:opacity-100 ${showDashboardFilters ? 'max-h-[150px] opacity-100 mt-4 md:mt-0 md:max-h-none' : 'max-h-0 opacity-0 mt-0 md:max-h-none'}`}>
         <div 
           className={`transition-all duration-500 flex items-center gap-9 ${showDashboardFilters ? 'opacity-0 -translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0'}`}
         >
@@ -64,7 +64,7 @@ export default function Navbar({
 
         {dashboardContent && (
           <div 
-            className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${showDashboardFilters ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+            className={`md:absolute md:inset-0 flex items-center justify-center w-full transition-all duration-500 ${showDashboardFilters ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
           >
             {dashboardContent}
           </div>
